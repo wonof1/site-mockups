@@ -1,0 +1,3 @@
+// Runs before the body paints, so the opening never flashes over an already visible page.
+export const arrivalBootstrap = `(function(){try{var reduced=matchMedia('(prefers-reduced-motion: reduce)').matches||new URLSearchParams(location.search).get('motion')==='reduce';var replay=new URLSearchParams(location.search).get('intro')==='replay';if(location.pathname==='/'&&!reduced&&(replay||sessionStorage.getItem('wo1-arrival-v2')!=='seen')){document.documentElement.dataset.arrival='waiting';sessionStorage.setItem('wo1-arrival-v2','seen');window.setTimeout(function(){delete document.documentElement.dataset.arrival},5500)}}catch(e){}})();`;
+

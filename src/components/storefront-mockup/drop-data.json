@@ -1,0 +1,765 @@
+[
+  {
+    "id": "court-tee",
+    "name": "Court Tee",
+    "category": "T-shirts",
+    "audience": "Men",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Navy",
+        "hex": "#1c2b43",
+        "image": "/products/court-tee-navy.webp"
+      },
+      {
+        "name": "Beige",
+        "hex": "#c5b59b",
+        "image": "/products/court-tee-beige-clean.webp"
+      },
+      {
+        "name": "Forest",
+        "hex": "#1f3c30",
+        "image": "/products/court-tee-forest.webp"
+      },
+      {
+        "name": "Black",
+        "hex": "#202021",
+        "image": "/products/court-tee-black.webp"
+      }
+    ],
+    "limited": false,
+    "description": ""
+  },
+  {
+    "id": "wordmark-tee",
+    "name": "Wordmark Tee",
+    "category": "T-shirts",
+    "audience": "Women",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Black",
+        "hex": "#202021",
+        "image": "/products/wordmark-tee-black.webp"
+      },
+      {
+        "name": "Navy",
+        "hex": "#1c2b43",
+        "image": "/products/wordmark-tee-navy.webp"
+      },
+      {
+        "name": "Charcoal",
+        "hex": "#505153",
+        "image": "/products/wordmark-tee-charcoal.webp"
+      },
+      {
+        "name": "White",
+        "hex": "#f8f8f6",
+        "image": "/products/wordmark-tee-white-clean.webp"
+      },
+      {
+        "name": "Cream",
+        "hex": "#eae3d3",
+        "image": "/products/wordmark-tee-cream-clean.webp"
+      },
+      {
+        "name": "Forest",
+        "hex": "#1f3c30",
+        "image": "/products/wordmark-tee-forest.webp"
+      }
+    ],
+    "limited": false,
+    "description": ""
+  },
+  {
+    "id": "court-shorts",
+    "name": "Court Shorts",
+    "category": "Shorts",
+    "audience": "Men",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Navy",
+        "hex": "#1c2b43",
+        "image": "/products/court-shorts-navy.webp"
+      },
+      {
+        "name": "Black",
+        "hex": "#202021",
+        "image": "/products/court-shorts-black.webp"
+      },
+      {
+        "name": "White",
+        "hex": "#f8f8f6",
+        "image": "/products/court-shorts-white-clean.webp"
+      },
+      {
+        "name": "Beige",
+        "hex": "#c5b59b",
+        "image": "/products/court-shorts-beige-clean.webp"
+      },
+      {
+        "name": "Forest",
+        "hex": "#1f3c30",
+        "image": "/products/court-shorts-forest.webp"
+      },
+      {
+        "name": "Charcoal",
+        "hex": "#505153",
+        "image": "/products/court-shorts-charcoal.webp"
+      }
+    ],
+    "limited": false,
+    "description": ""
+  },
+  {
+    "id": "wordmark-sweatpants",
+    "name": "Wordmark Wide-leg Pants",
+    "category": "Pants",
+    "audience": "Men",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Black",
+        "hex": "#202021",
+        "image": "/products/wordmark-sweatpants-black.webp"
+      },
+      {
+        "name": "Charcoal",
+        "hex": "#505153",
+        "image": "/products/wordmark-sweatpants-charcoal.webp"
+      },
+      {
+        "name": "Navy",
+        "hex": "#1c2b43",
+        "image": "/products/wordmark-sweatpants-navy.webp"
+      },
+      {
+        "name": "Forest",
+        "hex": "#1f3c30",
+        "image": "/products/wordmark-sweatpants-forest.webp"
+      },
+      {
+        "name": "Beige",
+        "hex": "#c5b59b",
+        "image": "/products/wordmark-sweatpants-beige-clean.webp"
+      },
+      {
+        "name": "Brown",
+        "hex": "#574235",
+        "image": "/products/wordmark-sweatpants-brown.webp"
+      },
+      {
+        "name": "Burgundy",
+        "hex": "#692d36",
+        "image": "/products/wordmark-sweatpants-burgundy.webp"
+      }
+    ],
+    "limited": false,
+    "description": ""
+  },
+  {
+    "id": "cuffed-joggers",
+    "name": "Cuffed Joggers",
+    "category": "Pants",
+    "audience": "Men",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Navy",
+        "hex": "#1c2b43",
+        "image": "/products/cuffed-joggers-navy.webp"
+      },
+      {
+        "name": "Black",
+        "hex": "#202021",
+        "image": "/products/cuffed-joggers-black.webp"
+      },
+      {
+        "name": "Grey",
+        "hex": "#a5a5a3",
+        "image": "/products/cuffed-joggers-grey-clean.webp"
+      },
+      {
+        "name": "Forest",
+        "hex": "#1f3c30",
+        "image": "/products/cuffed-joggers-forest.webp"
+      },
+      {
+        "name": "Beige",
+        "hex": "#c5b59b",
+        "image": "/products/cuffed-joggers-beige-clean.webp"
+      },
+      {
+        "name": "Brown",
+        "hex": "#574235",
+        "image": "/products/cuffed-joggers-brown.webp"
+      },
+      {
+        "name": "Burgundy",
+        "hex": "#692d36",
+        "image": "/products/cuffed-joggers-burgundy.webp"
+      }
+    ],
+    "limited": false,
+    "description": ""
+  },
+  {
+    "id": "logo-sweatpants",
+    "name": "Logo Wide-leg Pants",
+    "category": "Pants",
+    "audience": "Men",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Black",
+        "hex": "#202021",
+        "image": "/products/logo-sweatpants-black.webp"
+      },
+      {
+        "name": "Charcoal",
+        "hex": "#505153",
+        "image": "/products/logo-sweatpants-charcoal.webp"
+      },
+      {
+        "name": "Navy",
+        "hex": "#1c2b43",
+        "image": "/products/logo-sweatpants-navy.webp"
+      },
+      {
+        "name": "Forest",
+        "hex": "#1f3c30",
+        "image": "/products/logo-sweatpants-forest.webp"
+      },
+      {
+        "name": "Beige",
+        "hex": "#c5b59b",
+        "image": "/products/logo-sweatpants-beige-clean.webp"
+      },
+      {
+        "name": "Brown",
+        "hex": "#574235",
+        "image": "/products/logo-sweatpants-brown.webp"
+      },
+      {
+        "name": "Burgundy",
+        "hex": "#692d36",
+        "image": "/products/logo-sweatpants-burgundy.webp"
+      }
+    ],
+    "limited": false,
+    "description": ""
+  },
+  {
+    "id": "logo-quarter-zip",
+    "name": "Logo Quarter-zip",
+    "category": "Quarter-zips",
+    "audience": "Men",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Forest",
+        "hex": "#1f3c30",
+        "image": "/products/logo-quarter-zip-forest.webp"
+      },
+      {
+        "name": "Navy",
+        "hex": "#1c2b43",
+        "image": "/products/logo-quarter-zip-navy.webp"
+      },
+      {
+        "name": "Black",
+        "hex": "#202021",
+        "image": "/products/logo-quarter-zip-black.webp"
+      },
+      {
+        "name": "Grey",
+        "hex": "#a5a5a3",
+        "image": "/products/logo-quarter-zip-grey-clean.webp"
+      },
+      {
+        "name": "Beige",
+        "hex": "#c5b59b",
+        "image": "/products/logo-quarter-zip-beige-clean.webp"
+      },
+      {
+        "name": "Burgundy",
+        "hex": "#692d36",
+        "image": "/products/logo-quarter-zip-burgundy.webp"
+      }
+    ],
+    "limited": false,
+    "description": ""
+  },
+  {
+    "id": "stripe-quarter-zip",
+    "name": "Stripe Quarter-zip",
+    "category": "Quarter-zips",
+    "audience": "Men",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Forest",
+        "hex": "#1f3c30",
+        "image": "/products/stripe-quarter-zip-forest.webp"
+      },
+      {
+        "name": "Navy",
+        "hex": "#1c2b43",
+        "image": "/products/stripe-quarter-zip-navy.webp"
+      },
+      {
+        "name": "Black",
+        "hex": "#202021",
+        "image": "/products/stripe-quarter-zip-black.webp"
+      },
+      {
+        "name": "Grey",
+        "hex": "#a5a5a3",
+        "image": "/products/stripe-quarter-zip-grey-clean.webp"
+      },
+      {
+        "name": "Beige",
+        "hex": "#c5b59b",
+        "image": "/products/stripe-quarter-zip-beige-clean.webp"
+      },
+      {
+        "name": "Burgundy",
+        "hex": "#692d36",
+        "image": "/products/stripe-quarter-zip-burgundy.webp"
+      }
+    ],
+    "limited": false,
+    "description": ""
+  },
+  {
+    "id": "logo-sweatshirt",
+    "name": "Logo Sweatshirt",
+    "category": "Sweatshirts",
+    "audience": "Men",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Forest",
+        "hex": "#1f3c30",
+        "image": "/products/logo-sweatshirt-forest.webp"
+      },
+      {
+        "name": "Navy",
+        "hex": "#1c2b43",
+        "image": "/products/logo-sweatshirt-navy.webp"
+      },
+      {
+        "name": "Black",
+        "hex": "#202021",
+        "image": "/products/logo-sweatshirt-black.webp"
+      },
+      {
+        "name": "Grey",
+        "hex": "#a5a5a3",
+        "image": "/products/logo-sweatshirt-grey-clean.webp"
+      },
+      {
+        "name": "Beige",
+        "hex": "#c5b59b",
+        "image": "/products/logo-sweatshirt-beige-clean.webp"
+      },
+      {
+        "name": "Burgundy",
+        "hex": "#692d36",
+        "image": "/products/logo-sweatshirt-burgundy.webp"
+      }
+    ],
+    "limited": false,
+    "description": ""
+  },
+  {
+    "id": "stripe-sweatshirt",
+    "name": "Stripe Sweatshirt",
+    "category": "Sweatshirts",
+    "audience": "Men",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Forest",
+        "hex": "#1f3c30",
+        "image": "/products/stripe-sweatshirt-forest.webp"
+      },
+      {
+        "name": "Navy",
+        "hex": "#1c2b43",
+        "image": "/products/stripe-sweatshirt-navy.webp"
+      },
+      {
+        "name": "Black",
+        "hex": "#202021",
+        "image": "/products/stripe-sweatshirt-black.webp"
+      },
+      {
+        "name": "Grey",
+        "hex": "#a5a5a3",
+        "image": "/products/stripe-sweatshirt-grey-clean.webp"
+      },
+      {
+        "name": "Beige",
+        "hex": "#c5b59b",
+        "image": "/products/stripe-sweatshirt-beige-clean.webp"
+      },
+      {
+        "name": "Burgundy",
+        "hex": "#692d36",
+        "image": "/products/stripe-sweatshirt-burgundy.webp"
+      }
+    ],
+    "limited": false,
+    "description": ""
+  },
+  {
+    "id": "court-cap",
+    "name": "Court Cap",
+    "category": "Accessories",
+    "audience": "Accessories",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Navy",
+        "hex": "#1c2b43",
+        "image": "/products/court-cap-navy.webp"
+      },
+      {
+        "name": "Black",
+        "hex": "#202021",
+        "image": "/products/court-cap-black.webp"
+      },
+      {
+        "name": "White",
+        "hex": "#f8f8f6",
+        "image": "/products/court-cap-white-clean.webp"
+      },
+      {
+        "name": "Beige",
+        "hex": "#c5b59b",
+        "image": "/products/court-cap-beige-clean.webp"
+      },
+      {
+        "name": "Forest",
+        "hex": "#1f3c30",
+        "image": "/products/court-cap-forest.webp"
+      }
+    ],
+    "limited": false,
+    "description": ""
+  },
+  {
+    "id": "logo-cap",
+    "name": "Logo Cap",
+    "category": "Accessories",
+    "audience": "Accessories",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Navy",
+        "hex": "#1c2b43",
+        "image": "/products/logo-cap-navy.webp"
+      },
+      {
+        "name": "Black",
+        "hex": "#202021",
+        "image": "/products/logo-cap-black.webp"
+      },
+      {
+        "name": "White",
+        "hex": "#f8f8f6",
+        "image": "/products/logo-cap-white-clean.webp"
+      },
+      {
+        "name": "Beige",
+        "hex": "#c5b59b",
+        "image": "/products/logo-cap-beige-clean.webp"
+      },
+      {
+        "name": "Forest",
+        "hex": "#1f3c30",
+        "image": "/products/logo-cap-forest.webp"
+      }
+    ],
+    "limited": false,
+    "description": ""
+  },
+  {
+    "id": "court-visor",
+    "name": "Court Visor",
+    "category": "Accessories",
+    "audience": "Accessories",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Navy",
+        "hex": "#1c2b43",
+        "image": "/products/court-visor-navy.webp"
+      },
+      {
+        "name": "Black",
+        "hex": "#202021",
+        "image": "/products/court-visor-black.webp"
+      },
+      {
+        "name": "White",
+        "hex": "#f8f8f6",
+        "image": "/products/court-visor-white-clean.webp"
+      },
+      {
+        "name": "Beige",
+        "hex": "#c5b59b",
+        "image": "/products/court-visor-beige-clean.webp"
+      },
+      {
+        "name": "Forest",
+        "hex": "#1f3c30",
+        "image": "/products/court-visor-forest.webp"
+      }
+    ],
+    "limited": false,
+    "description": ""
+  },
+  {
+    "id": "crew-socks",
+    "name": "Crew Socks",
+    "category": "Accessories",
+    "audience": "Accessories",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Navy",
+        "hex": "#1c2b43",
+        "image": "/products/crew-socks-navy-clean.webp"
+      },
+      {
+        "name": "Black",
+        "hex": "#202021",
+        "image": "/products/crew-socks-black-clean.webp"
+      },
+      {
+        "name": "White",
+        "hex": "#f8f8f6",
+        "image": "/products/crew-socks-white-clean.webp"
+      },
+      {
+        "name": "Beige",
+        "hex": "#c5b59b",
+        "image": "/products/crew-socks-beige-clean.webp"
+      },
+      {
+        "name": "Forest",
+        "hex": "#1f3c30",
+        "image": "/products/crew-socks-forest-clean.webp"
+      }
+    ],
+    "limited": false,
+    "description": ""
+  },
+  {
+    "id": "tapia-edition-1",
+    "name": "Tapia / 01",
+    "category": "Graphic tees",
+    "audience": "Limited Edition",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Forest",
+        "hex": "#1f3c30",
+        "image": "/products/tapia-edition-1-forest-clean.webp"
+      }
+    ],
+    "limited": true,
+    "description": "",
+    "player": "Tapia"
+  },
+  {
+    "id": "tapia-edition-2",
+    "name": "Tapia / 02",
+    "category": "Graphic tees",
+    "audience": "Limited Edition",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Charcoal",
+        "hex": "#505153",
+        "image": "/products/tapia-edition-2-charcoal-clean.webp"
+      }
+    ],
+    "limited": true,
+    "description": "",
+    "player": "Tapia"
+  },
+  {
+    "id": "tapia-edition-3",
+    "name": "Tapia / 03",
+    "category": "Graphic tees",
+    "audience": "Limited Edition",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Cream",
+        "hex": "#eae3d3",
+        "image": "/products/tapia-edition-3-cream-clean.webp"
+      }
+    ],
+    "limited": true,
+    "description": "",
+    "player": "Tapia"
+  },
+  {
+    "id": "gal-n-edition-1",
+    "name": "Galán / 01",
+    "category": "Graphic tees",
+    "audience": "Limited Edition",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Forest",
+        "hex": "#1f3c30",
+        "image": "/products/gal-n-edition-1-forest-clean.webp"
+      }
+    ],
+    "limited": true,
+    "description": "",
+    "player": "Galán"
+  },
+  {
+    "id": "gal-n-edition-2",
+    "name": "Galán / 02",
+    "category": "Graphic tees",
+    "audience": "Limited Edition",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Black",
+        "hex": "#202021",
+        "image": "/products/gal-n-edition-2-black-clean.webp"
+      }
+    ],
+    "limited": true,
+    "description": "",
+    "player": "Galán"
+  },
+  {
+    "id": "gal-n-edition-3",
+    "name": "Galán / 03",
+    "category": "Graphic tees",
+    "audience": "Limited Edition",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Cream",
+        "hex": "#eae3d3",
+        "image": "/products/gal-n-edition-3-cream-clean.webp"
+      }
+    ],
+    "limited": true,
+    "description": "",
+    "player": "Galán"
+  },
+  {
+    "id": "coello-edition-1",
+    "name": "Coello / 01",
+    "category": "Graphic tees",
+    "audience": "Limited Edition",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Cream",
+        "hex": "#eae3d3",
+        "image": "/products/coello-edition-1-cream-clean.webp"
+      }
+    ],
+    "limited": true,
+    "description": "",
+    "player": "Coello"
+  },
+  {
+    "id": "coello-edition-2",
+    "name": "Coello / 02",
+    "category": "Graphic tees",
+    "audience": "Limited Edition",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Charcoal",
+        "hex": "#505153",
+        "image": "/products/coello-edition-2-charcoal-clean.webp"
+      }
+    ],
+    "limited": true,
+    "description": "",
+    "player": "Coello"
+  },
+  {
+    "id": "coello-edition-3",
+    "name": "Coello / 03",
+    "category": "Graphic tees",
+    "audience": "Limited Edition",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Black",
+        "hex": "#202021",
+        "image": "/products/coello-edition-3-black-clean.webp"
+      }
+    ],
+    "limited": true,
+    "description": "",
+    "player": "Coello"
+  },
+  {
+    "id": "chingotto-edition-1",
+    "name": "Chingotto / 01",
+    "category": "Graphic tees",
+    "audience": "Limited Edition",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Forest",
+        "hex": "#1f3c30",
+        "image": "/products/chingotto-edition-1-forest-clean.webp"
+      }
+    ],
+    "limited": true,
+    "description": "",
+    "player": "Chingotto"
+  },
+  {
+    "id": "chingotto-edition-2",
+    "name": "Chingotto / 02",
+    "category": "Graphic tees",
+    "audience": "Limited Edition",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Charcoal",
+        "hex": "#505153",
+        "image": "/products/chingotto-edition-2-charcoal-clean.webp"
+      }
+    ],
+    "limited": true,
+    "description": "",
+    "player": "Chingotto"
+  },
+  {
+    "id": "chingotto-edition-3",
+    "name": "Chingotto / 03",
+    "category": "Graphic tees",
+    "audience": "Limited Edition",
+    "price": 0,
+    "variants": [
+      {
+        "name": "Cream",
+        "hex": "#eae3d3",
+        "image": "/products/chingotto-edition-3-cream-clean.webp"
+      }
+    ],
+    "limited": true,
+    "description": "",
+    "player": "Chingotto"
+  }
+]

@@ -51,9 +51,9 @@ export default function BrandIntro({ children }: { children: ReactNode }) {
       {children}
       <button className="wo-replay" onClick={play} aria-label="Replay introduction">↻</button>
       <div className="wo-cinema-layers" aria-hidden="true">
-        <div className="wo-cinema-layer wo-layer-navy"><div><Image src="/brand/intro-navy-detail.png" alt="" fill sizes="100vw" priority /></div></div>
-        <div className="wo-cinema-layer wo-layer-white"><div><Image src="/brand/intro-white-apparel.png" alt="" fill sizes="100vw" priority /></div></div>
-        <div className="wo-cinema-layer wo-layer-campaign"><div><Image src="/brand/court-campaign-concept.png" alt="" fill sizes="100vw" priority /></div></div>
+        <div className="wo-cinema-layer wo-layer-navy"><div><Image src="/products/logo-quarter-zip-navy.webp" alt="" fill sizes="100vw" priority /></div></div>
+        <div className="wo-cinema-layer wo-layer-white"><div><Image src="/products/wordmark-tee-white.webp" alt="" fill sizes="100vw" priority /></div></div>
+        <div className="wo-cinema-layer wo-layer-campaign"><div><Image src="/brand/indo-padel.jpg" alt="" fill sizes="100vw" priority /></div></div>
       </div>
     </section>
   );

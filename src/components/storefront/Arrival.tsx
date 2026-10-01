@@ -31,9 +31,8 @@ export default function Arrival() {
     const target = document.querySelector<HTMLImageElement>(".header .brand img");
     const backdrop = document.querySelector<HTMLElement>(".arrival-backdrop");
     const hero = document.querySelector<HTMLElement>(".hero");
-    const heroPhoto = hero?.querySelector<HTMLImageElement>("img");
     let waitTimer: ReturnType<typeof setTimeout>;
-    Promise.race([Promise.all([logo?.decode().catch(() => {}), heroPhoto?.decode().catch(() => {})]), new Promise<void>(resolve => { waitTimer = setTimeout(resolve, 800); })]).then(() => {
+    Promise.race([logo?.decode().catch(() => {}), new Promise<void>(resolve => { waitTimer = setTimeout(resolve, 800); })]).then(() => {
       clearTimeout(waitTimer);
       if (cancelled || !logo || !target || !backdrop) return;
       frame = requestAnimationFrame(() => {

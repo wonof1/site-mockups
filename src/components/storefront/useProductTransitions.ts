@@ -6,6 +6,9 @@ type Router = { push: (href: string, options?: { scroll?: boolean }) => void };
 type Pending = { href: string; arrive: () => void; cancel: () => void };
 let pending: Pending | undefined;
 const origins = new Map<string, { pathname: string; scroll: number }>();
+export function productReturnPath(productPath: string, fallback: string) {
+  return origins.get(productPath)?.pathname || fallback;
+}
 const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.classList.contains("reduced");
 
 function isCategoryChange(from: string, to: string) {
@@ -191,10 +194,14 @@ export function useProductTransitions(pathname: string, router: Router) {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     const anchor = (event.target as HTMLElement).closest<HTMLAnchorElement>('a[href^="/"]');
     pending?.cancel();
-    if (!anchor || reduceMotion()) return;
+    if (!anchor) return;
     const href = anchor.getAttribute("href")!;
     const destination = new URL(anchor.href).pathname;
     if (destination === pathname || anchor.target === "_blank" || anchor.hasAttribute("download")) return;
+    if (destination.startsWith("/product/") && !pathname.startsWith("/product/")) {
+      origins.set(destination, { pathname, scroll: window.scrollY });
+    }
+    if (reduceMotion()) return;
     if (isCategoryChange(pathname, destination)) {
       event.preventDefault();
       router.push(href, { scroll: false });
@@ -207,7 +214,6 @@ export function useProductTransitions(pathname: string, router: Router) {
       transitionPage(destination, () => router.push(href, { scroll: false }));
       return;
     }
-    if (!reverse) origins.set(destination, { pathname, scroll: window.scrollY });
     begin(img, destination, reverse ? pathname : destination, reverse);
     router.push(href, { scroll: false });
   };

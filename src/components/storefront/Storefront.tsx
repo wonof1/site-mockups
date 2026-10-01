@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { transitionHome, useProductTransitions } from "./useProductTransitions";
+import { productReturnPath, transitionHome, useProductTransitions } from "./useProductTransitions";
 import { MobileMenu } from "./MobileMenu";
 import { InstagramFeed } from "./InstagramFeed";
 import catalogue from "./catalogue.json";
@@ -105,7 +105,9 @@ export default function Storefront() {
     }
     const back = p.limited ? `/limited/${encodeURIComponent(p.player || players[0])}` : `/${dept}`;
     const category = p.limited ? back : categoryUrl(dept, dept === "accessories" ? undefined : p.category);
-    return <section className="product-page"><Breadcrumb><Link href={back}>{p.limited ? "Limited Edition" : title(dept)}</Link><span>/</span>{p.limited ? <span>{p.player}</span> : <Link href={category}>{p.category}</Link>}</Breadcrumb><div className="product-layout"><div className="product-title"><Link className="product-back" href={back}>← {p.limited ? "Limited Edition" : title(dept)}</Link><h1>{p.name}</h1></div><button className={`gallery${enlarged ? " enlarged" : ""}`} onClick={() => setEnlarged(!enlarged)} aria-label={`${enlarged ? "Reduce" : "Enlarge"} ${p.name}`} aria-pressed={enlarged}><Photo src={variant(p).image} alt={`${p.name}, ${variant(p).name}`} eager /></button><div className="product-info"><p className="chosen">{variant(p).name}</p>{swatches(p)}<div className="product-controls"><button onClick={() => setEnlarged(!enlarged)}>{enlarged ? "Reduce image" : "Enlarge image"}</button></div><Link className="category-link" href={p.limited ? "/limited" : category}>{p.limited ? "All limited edition tees" : `All ${dept === "accessories" ? "accessories" : p.category.toLowerCase()}`} →</Link></div></div></section>;
+    const returnTo = productReturnPath(pathname, back);
+    const returnLabel = returnTo === "/" ? "Home" : returnTo.startsWith("/limited") ? "Limited Edition" : decodeURIComponent(returnTo.split("/").filter(Boolean).map(title).join(" / "));
+    return <section className="product-page"><Breadcrumb><Link href={back}>{p.limited ? "Limited Edition" : title(dept)}</Link><span>/</span>{p.limited ? <span>{p.player}</span> : <Link href={category}>{p.category}</Link>}</Breadcrumb><div className="product-layout"><div className="product-title"><Link className="product-back" href={returnTo}>← {returnLabel}</Link><h1>{p.name}</h1></div><button className={`gallery${enlarged ? " enlarged" : ""}`} onClick={() => setEnlarged(!enlarged)} aria-label={`${enlarged ? "Reduce" : "Enlarge"} ${p.name}`} aria-pressed={enlarged}><Photo src={variant(p).image} alt={`${p.name}, ${variant(p).name}`} eager /></button><div className="product-info"><p className="chosen">{variant(p).name}</p>{swatches(p)}<div className="product-controls"><button onClick={() => setEnlarged(!enlarged)}>{enlarged ? "Reduce image" : "Enlarge image"}</button></div><Link className="category-link" href={p.limited ? "/limited" : category}>{p.limited ? "All limited edition tees" : `All ${dept === "accessories" ? "accessories" : p.category.toLowerCase()}`} →</Link></div></div></section>;
   }
   function Limited({ player }: { player?: string }) {
     const current = players.includes(player || "") ? player! : players[0];

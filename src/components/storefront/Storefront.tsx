@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { transitionHome, useProductTransitions } from "./useProductTransitions";
+import { MobileMenu } from "./MobileMenu";
+import { InstagramFeed } from "./InstagramFeed";
 import catalogue from "./catalogue.json";
 import assets from "./assets.json";
 import { useStorePreferences } from "./StorePreferences";
@@ -30,10 +33,12 @@ function Photo({ src, alt, eager = false }: { src: string; alt: string; eager?: 
 export default function Storefront() {
   const pathname = usePathname();
   const router = useRouter();
+  const transitionToProduct = useProductTransitions(pathname, router);
   const parts = pathname.split("/").filter(Boolean).map(s => { try { return decodeURIComponent(s); } catch { return s; } });
   const page = parts[0] || "home";
   const [selected, setSelected] = useStorePreferences();
   const [open, setOpen] = useState<Department | "all" | null>(null);
+  const closeMenu = useCallback(() => setOpen(null), []);
   const [enlarged, setEnlarged] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -81,7 +86,7 @@ export default function Storefront() {
   }
   function Home() {
     return <>
-      <section className="hero"><Photo src={assets.court} alt="Aerial view of outdoor padel courts" eager /><div className="hero-caption"><h1>WON OF ONE</h1><nav className="hero-links" aria-label="Shop apparel"><Link href="/men">Shop men</Link><Link href="/women">Shop women</Link></nav></div></section>
+      <section id="top" className="hero"><Photo src={assets.court} alt="Aerial view of outdoor padel courts" eager /><div className="hero-caption"><h1>WON OF ONE</h1><nav className="hero-links" aria-label="Shop apparel"><Link href="/men">Shop men</Link><Link href="/women">Shop women</Link></nav></div></section>
       <section className="home-selection" aria-labelledby="apparel-heading"><div className="section-heading"><h2 id="apparel-heading">Apparel</h2><nav aria-label="Shop all apparel"><Link className="text-link" href="/men">Shop men →</Link><Link className="text-link" href="/women">Shop women →</Link></nav></div><div className="featured-products">{["court-tee", "court-shorts", "logo-quarter-zip", "wordmark-sweatpants"].map(id => card(product(id), "men"))}</div></section>
       <section className="category-stories" aria-label="Shop by category">{[{ id: "wordmark-tee", category: "T-shirts", colour: 3 }, { id: "stripe-quarter-zip", category: "Quarter-zips", colour: 0 }].map(item => { const p = product(item.id), v = p.variants[item.colour]; return <article className="category-story" key={p.id}><Link className="story-image" href={categoryUrl("men", item.category)}><Photo src={v.image} alt={`${p.name}, ${v.name}`} /></Link><div className="story-caption"><h2>{item.category}</h2><nav aria-label={`Shop ${item.category.toLowerCase()}`}><Link href={categoryUrl("men", item.category)}>Men →</Link><Link href={categoryUrl("women", item.category)}>Women →</Link></nav></div></article>; })}</section>
       <section className="home-accessories" aria-labelledby="accessories-heading"><div className="section-heading"><h2 id="accessories-heading">Accessories</h2><Link className="text-link" href="/accessories">Shop all →</Link></div><div className="accessories-row">{accessories.map(p => <Link key={p.id} className="accessory-item" href={url(p, "accessories")}><div><Photo src={variant(p).image} alt={p.name} /></div><span>{p.name}</span></Link>)}</div></section>
@@ -89,7 +94,7 @@ export default function Storefront() {
   }
   function Collection({ dept, category }: { dept: Department; category?: string }) {
     const items = (dept === "accessories" ? accessories : apparel).filter(p => !category || p.category === category);
-    return <section className="collection"><Breadcrumb>{category ? <><Link href={`/${dept}`}>{title(dept)}</Link><span>/</span><span>{category}</span></> : <span>{title(dept)}</span>}</Breadcrumb><h1>{category || title(dept)}</h1>{dept !== "accessories" && <><nav className="categories" aria-label={`${title(dept)} categories`}><Link href={`/${dept}`} aria-current={!category ? "page" : undefined}>All {dept}</Link>{categories.map(c => <Link key={c} href={categoryUrl(dept, c)} aria-current={c === category ? "page" : undefined}>{c}</Link>)}</nav><label className="mobile-filter"><select aria-label={`${title(dept)} category`} value={categoryUrl(dept, category)} onChange={e => { router.push(e.target.value); }}><option value={`/${dept}`}>All {dept}</option>{categories.map(c => <option key={c} value={categoryUrl(dept, c)}>{c}</option>)}</select></label></>}<div className="products">{items.map(p => card(p, dept))}</div></section>;
+    return <section className="collection"><Breadcrumb>{category ? <><Link href={`/${dept}`}>{title(dept)}</Link><span>/</span><span>{category}</span></> : <span>{title(dept)}</span>}</Breadcrumb><h1>{category || title(dept)}</h1>{dept !== "accessories" && <><nav className="categories" aria-label={`${title(dept)} categories`}><Link href={`/${dept}`} aria-current={!category ? "page" : undefined}>All {dept}</Link>{categories.map(c => <Link key={c} href={categoryUrl(dept, c)} aria-current={c === category ? "page" : undefined}>{c}</Link>)}</nav><label className="mobile-filter"><select aria-label={`${title(dept)} category`} value={categoryUrl(dept, category)} onChange={e => { router.push(e.target.value, { scroll: false }); }}><option value={`/${dept}`}>All {dept}</option>{categories.map(c => <option key={c} value={categoryUrl(dept, c)}>{c}</option>)}</select></label></>}<div className="products">{items.map(p => card(p, dept))}</div></section>;
   }
   function ProductPage({ p, dept }: { p: Product; dept: string }) {
     // Each player's supplied editions are colour choices on the same product page.
@@ -100,7 +105,7 @@ export default function Storefront() {
     }
     const back = p.limited ? `/limited/${encodeURIComponent(p.player || players[0])}` : `/${dept}`;
     const category = p.limited ? back : categoryUrl(dept, dept === "accessories" ? undefined : p.category);
-    return <section className="product-page"><Breadcrumb><Link href={back}>{p.limited ? "Limited Edition" : title(dept)}</Link><span>/</span>{p.limited ? <span>{p.player}</span> : <Link href={category}>{p.category}</Link>}</Breadcrumb><div className="product-layout"><button className={`gallery${enlarged ? " enlarged" : ""}`} onClick={() => setEnlarged(!enlarged)} aria-label={`${enlarged ? "Reduce" : "Enlarge"} ${p.name}`} aria-pressed={enlarged}><Photo src={variant(p).image} alt={`${p.name}, ${variant(p).name}`} eager /></button><div className="product-info"><h1>{p.name}</h1><p className="chosen">{variant(p).name}</p>{swatches(p)}<div className="variant-gallery" aria-label={`${p.name} images`}>{p.variants.map((v, i) => <button key={v.name} onClick={() => choose(p, i)} aria-label={`View ${v.name}`} aria-pressed={(selected[p.id] || 0) === i}><Photo src={v.image} alt={`${p.name}, ${v.name}`} /></button>)}</div><div className="product-controls"><button onClick={() => setEnlarged(!enlarged)}>{enlarged ? "Reduce image" : "Enlarge image"}</button><Link href={back}>← {p.limited ? p.player : title(dept)}</Link></div><Link className="category-link" href={p.limited ? "/limited" : category}>{p.limited ? "All limited edition tees" : `All ${dept === "accessories" ? "accessories" : p.category.toLowerCase()}`} →</Link></div></div></section>;
+    return <section className="product-page"><Breadcrumb><Link href={back}>{p.limited ? "Limited Edition" : title(dept)}</Link><span>/</span>{p.limited ? <span>{p.player}</span> : <Link href={category}>{p.category}</Link>}</Breadcrumb><div className="product-layout"><div className="product-title"><Link className="product-back" href={back}>← {p.limited ? "Limited Edition" : title(dept)}</Link><h1>{p.name}</h1></div><button className={`gallery${enlarged ? " enlarged" : ""}`} onClick={() => setEnlarged(!enlarged)} aria-label={`${enlarged ? "Reduce" : "Enlarge"} ${p.name}`} aria-pressed={enlarged}><Photo src={variant(p).image} alt={`${p.name}, ${variant(p).name}`} eager /></button><div className="product-info"><p className="chosen">{variant(p).name}</p>{swatches(p)}<div className="product-controls"><button onClick={() => setEnlarged(!enlarged)}>{enlarged ? "Reduce image" : "Enlarge image"}</button></div><Link className="category-link" href={p.limited ? "/limited" : category}>{p.limited ? "All limited edition tees" : `All ${dept === "accessories" ? "accessories" : p.category.toLowerCase()}`} →</Link></div></div></section>;
   }
   function Limited({ player }: { player?: string }) {
     const current = players.includes(player || "") ? player! : players[0];
@@ -114,11 +119,23 @@ export default function Storefront() {
   else if (page === "limited") content = Limited({ player: parts[1] });
   return <>
     <a className="skip" href="#main">Skip to content</a>{page !== "home" && <div className="strip" />}
-    <div ref={navigation} className={`site-navigation${page === "home" ? " home-navigation" : ""}${scrolled ? " is-scrolled" : ""}`} onPointerLeave={() => { if (window.innerWidth > 650) setOpen(null); }}>
-      <header className="header"><svg width="0" height="0" aria-hidden="true" style={{ position: "absolute" }}><defs><filter id="header-white-mark" colorInterpolationFilters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  -0.2126 -0.7152 -0.0722 0 1" /><feComposite in2="SourceGraphic" operator="in" /></filter></defs></svg><button className="menu-button" aria-expanded={open === "all"} aria-controls="menu" onClick={e => { trigger.current = e.currentTarget; setOpen(open ? null : "all"); }}>Menu</button><nav className="main-nav" aria-label="Shop">{departments.map(d => <Link key={d} href={`/${d}`} aria-expanded={open === d} aria-controls="menu" onPointerEnter={e => { if (e.pointerType === "mouse") { trigger.current = e.currentTarget; setOpen(d); } }} onFocus={e => { if (!suppressFocus.current && window.innerWidth > 650) { trigger.current = e.currentTarget; setOpen(d); } }} onKeyDown={e => { if (e.key === "ArrowDown") { e.preventDefault(); trigger.current = e.currentTarget; setOpen(d); requestAnimationFrame(() => menu.current?.querySelector("a")?.focus()); } }} onClick={() => setOpen(null)}>{title(d)}</Link>)}</nav><Link className="brand" href="/" aria-label="WON OF ONE home" onPointerEnter={() => setOpen(null)}><Photo src={assets.logo} alt="WON OF ONE" eager /></Link><nav className="edition-nav" onPointerEnter={() => setOpen(null)}><Link href="/limited">Limited Edition</Link></nav></header>
-      <div ref={menu} id="menu" className="menu" hidden={!open} onClick={() => setOpen(null)}>{(open === "all" ? departments : open ? [open] : []).map(d => <nav key={d} aria-label={`${title(d)} categories`}>{open === "all" && <strong><Link href={`/${d}`}>{title(d)}</Link></strong>}<Link href={`/${d}`}>Shop all {d}</Link>{d === "accessories" ? accessories.map(p => <Link key={p.id} href={url(p, d)}>{p.name}</Link>) : categories.map(c => <Link key={c} href={categoryUrl(d, c)}>{c}</Link>)}</nav>)}</div>
+    <div ref={navigation} onClickCapture={transitionToProduct} className={`site-navigation${page === "home" ? " home-navigation" : ""}${scrolled ? " is-scrolled" : ""}`} onPointerLeave={() => { if (window.innerWidth > 650) setOpen(null); }}>
+      <header className="header"><svg width="0" height="0" aria-hidden="true" style={{ position: "absolute" }}><defs><filter id="header-white-mark" colorInterpolationFilters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  -0.2126 -0.7152 -0.0722 0 1" /><feComposite in2="SourceGraphic" operator="in" /></filter></defs></svg><button className="menu-button" aria-expanded={open === "all"} aria-haspopup="dialog" onClick={e => { trigger.current = e.currentTarget; setOpen(open ? null : "all"); }}>Menu</button><nav className="main-nav" aria-label="Shop">{departments.map(d => <Link key={d} href={`/${d}`} aria-expanded={open === d} aria-controls="menu" onPointerEnter={e => { if (e.pointerType === "mouse") { trigger.current = e.currentTarget; setOpen(d); } }} onFocus={e => { if (!suppressFocus.current && window.innerWidth > 650) { trigger.current = e.currentTarget; setOpen(d); } }} onKeyDown={e => { if (e.key === "ArrowDown") { e.preventDefault(); trigger.current = e.currentTarget; setOpen(d); requestAnimationFrame(() => menu.current?.querySelector("a")?.focus()); } }} onClick={() => setOpen(null)}>{title(d)}</Link>)}</nav><Link className="brand" href="/#top" aria-label="WON OF ONE home" onPointerEnter={() => setOpen(null)} onClick={e => {
+        if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        setOpen(null);
+        if (page === "home") {
+          e.preventDefault();
+          window.scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.classList.contains("reduced") ? "instant" : "smooth" });
+        } else {
+          e.preventDefault();
+          transitionHome(() => router.push("/#top", { scroll: false }));
+        }
+      }}><Photo src={assets.logo} alt="WON OF ONE" eager /></Link><nav className="edition-nav" onPointerEnter={() => setOpen(null)}><Link href="/limited">Limited Edition</Link></nav></header>
+      <div ref={menu} id="menu" className="menu" hidden={!open || open === "all"} onClick={() => setOpen(null)}>{(open === "all" ? departments : open ? [open] : []).map(d => <nav key={d} aria-label={`${title(d)} categories`}>{open === "all" && <strong><Link href={`/${d}`}>{title(d)}</Link></strong>}<Link href={`/${d}`}>Shop all {d}</Link>{d === "accessories" ? accessories.map(p => <Link key={p.id} href={url(p, d)}>{p.name}</Link>) : categories.map(c => <Link key={c} href={categoryUrl(d, c)}>{c}</Link>)}</nav>)}</div>
+      <MobileMenu open={open === "all"} close={closeMenu} groups={departments.map(d => ({ label: title(d), href: `/${d}`, links: d === "accessories" ? accessories.map(p => ({ label: p.name, href: url(p, d) })) : categories.map(c => ({ label: c, href: categoryUrl(d, c) })) }))} />
     </div>
-    <main id="main" ref={main} tabIndex={-1}>{content}</main>
+    <main id="main" ref={main} tabIndex={-1} onClickCapture={transitionToProduct}>{content}</main>
+    {page === "home" && <InstagramFeed />}
     <footer className="live-footer"><span>WO1 · WON OF ONE</span><nav aria-label="Legal"><a href="https://wonof1.com/privacy/">Privacy</a><a href="https://wonof1.com/terms/">Terms</a></nav><span>© {new Date().getFullYear()}</span></footer>
   </>;
 }

@@ -35,3 +35,10 @@ Motion reference attribution is in MOTION-LICENSE.txt; font licensing is in publ
 - No retail prices, inventory, release dates, or edition quantities are asserted.
 
 If reusing dependencies via a symlink from the original repository, use `npm run dev -- --webpack`. A normal `npm install` does not need this override.
+
+
+## Instagram section
+
+The storefront displays six curated posts from @wo1_padel, saved on October 1, 2026. Post links and local thumbnail paths live in src/components/storefront/instagram.json; images live in public/storefront/instagram. These are real posts, not a live API feed. Automatic refresh requires an authorized Instagram integration. No access tokens or third-party widget scripts are included.
+
+Product-image transitions run in the browser and respect reduced-motion settings. Modified clicks retain normal link behavior, and scrolling or keyboard input cancels an active transition.

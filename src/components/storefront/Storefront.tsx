@@ -8,6 +8,7 @@ import { MobileMenu } from "./MobileMenu";
 import { HeroMedia } from "./HeroMedia";
 import { InstagramFeed } from "./InstagramFeed";
 import catalogue from "./catalogue.json";
+import { modelCrop, modelVariantIndex, productPhotos } from "./productMedia";
 import assets from "./assets.json";
 import { useStorePreferences } from "./StorePreferences";
 
@@ -38,9 +39,11 @@ export default function Storefront() {
   const parts = pathname.split("/").filter(Boolean).map(s => { try { return decodeURIComponent(s); } catch { return s; } });
   const page = parts[0] || "home";
   const [selected, setSelected] = useStorePreferences();
+  const [productColour, setProductColour] = useState<{ path: string; index: number } | null>(null);
   const [open, setOpen] = useState<Department | "all" | null>(null);
   const closeMenu = useCallback(() => setOpen(null), []);
   const [enlarged, setEnlarged] = useState(false);
+  const [photoSelection, setPhotoSelection] = useState({ key: "", index: 0 });
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -55,11 +58,20 @@ export default function Storefront() {
   const trigger = useRef<HTMLAnchorElement | HTMLButtonElement | null>(null);
   const suppressFocus = useRef(false);
   const previousPath = useRef(pathname);
-  const variant = (p: Product) => p.variants[selected[p.id] || 0];
-  const choose = (p: Product, index: number) => setSelected(s => ({ ...s, [p.id]: index }));
+  // Trying a colour on the detail page must not overwrite the originating card.
+  const selectedIndex = (p: Product) => page === "product" && p.id === parts[2] && productColour?.path === pathname
+    ? productColour.index : selected[p.id] ?? modelVariantIndex(p.id, p.category === "Accessories" ? "accessories" : page === "women" || (page === "product" && parts[1] === "women") ? "women" : "men", p.variants);
+  const variant = (p: Product) => p.variants[selectedIndex(p)];
+  const choose = (p: Product, index: number) => {
+    if (page === "product") setProductColour({ path: pathname, index });
+    else setSelected(s => ({ ...s, [p.id]: index }));
+    setPhotoSelection({ key: "", index: 0 });
+    setEnlarged(false);
+  };
 
   useEffect(() => {
-    setOpen(null); setEnlarged(false);
+    setOpen(null); setEnlarged(false); setPhotoSelection({ key: "", index: 0 });
+    setProductColour(null);
     if (previousPath.current !== pathname) main.current?.focus({ preventScroll: true });
     previousPath.current = pathname;
   }, [pathname]);
@@ -80,17 +92,28 @@ export default function Storefront() {
   }, []);
 
   function swatches(p: Product) {
-    return <div className="swatches" aria-label={`${p.name} colours`}>{p.variants.map((v, i) => <button key={v.name} className="swatch" aria-label={v.name} aria-pressed={(selected[p.id] || 0) === i} style={{ "--colour": v.hex } as CSSProperties} onClick={() => choose(p, i)}><i /></button>)}</div>;
+    return <div className="swatches" aria-label={`${p.name} colours`}>{p.variants.map((v, i) => <button key={v.name} className="swatch" aria-label={v.name} aria-pressed={selectedIndex(p) === i} style={{ "--colour": v.hex } as CSSProperties} onClick={() => choose(p, i)}><i /></button>)}</div>;
   }
   function card(p: Product, dept: string) {
-    return <article key={p.id} className="product-card"><Link className="picture" href={url(p, dept)}><Photo src={variant(p).image} alt={`${p.name}, ${variant(p).name}`} /></Link><h2><Link href={url(p, dept)}>{p.name}</Link></h2><p className="card-colour">{variant(p).name}</p>{swatches(p)}</article>;
+    const colour = variant(p);
+    const photos = productPhotos(p.id, dept, colour);
+    const crop = modelCrop(p.id);
+    return <article key={p.id} className="product-card">
+      <Link className={`picture${photos.length > 1 ? " model-picture" : ""}`} style={photos.length > 1 ? { "--model-crop-scale": crop.scale, "--model-crop-origin": crop.origin } as CSSProperties : undefined} href={url(p, dept)}>
+        <Photo src={photos[0].src} alt={`${p.name}, ${colour.name}`} />
+      </Link>
+      <h2><Link href={url(p, dept)}>{p.name}</Link></h2><p className="card-colour">{colour.name}</p>{swatches(p)}
+    </article>;
   }
   function Home() {
     return <>
       <section id="top" className="hero"><HeroMedia /><div className="hero-caption"><h1>WON OF ONE</h1><nav className="hero-links" aria-label="Shop apparel"><Link href="/men">Shop men</Link><Link href="/women">Shop women</Link></nav></div></section>
       <section className="home-selection" aria-labelledby="apparel-heading"><div className="section-heading"><h2 id="apparel-heading">Apparel</h2><nav aria-label="Shop all apparel"><Link className="text-link" href="/men">Shop men →</Link><Link className="text-link" href="/women">Shop women →</Link></nav></div><div className="featured-products">{["court-tee", "court-shorts", "logo-quarter-zip", "wordmark-sweatpants"].map(id => card(product(id), "men"))}</div></section>
       <section className="category-stories" aria-label="Shop by category">{[{ id: "wordmark-tee", category: "T-shirts", colour: 3 }, { id: "stripe-quarter-zip", category: "Quarter-zips", colour: 0 }].map(item => { const p = product(item.id), v = p.variants[item.colour]; return <article className="category-story" key={p.id}><Link className="story-image" href={categoryUrl("men", item.category)}><Photo src={v.image} alt={`${p.name}, ${v.name}`} /></Link><div className="story-caption"><h2>{item.category}</h2><nav aria-label={`Shop ${item.category.toLowerCase()}`}><Link href={categoryUrl("men", item.category)}>Men →</Link><Link href={categoryUrl("women", item.category)}>Women →</Link></nav></div></article>; })}</section>
-      <section className="home-accessories" aria-labelledby="accessories-heading"><div className="section-heading"><h2 id="accessories-heading">Accessories</h2><Link className="text-link" href="/accessories">Shop all →</Link></div><div className="accessories-row">{accessories.map(p => <Link key={p.id} className="accessory-item" href={url(p, "accessories")}><div><Photo src={variant(p).image} alt={p.name} /></div><span>{p.name}</span></Link>)}</div></section>
+      <section className="home-accessories" aria-labelledby="accessories-heading"><div className="section-heading"><h2 id="accessories-heading">Accessories</h2><Link className="text-link" href="/accessories">Shop all →</Link></div><div className="accessories-row">{accessories.map(p => {
+        const colour = variant(p), photos = productPhotos(p.id, "accessories", colour), crop = modelCrop(p.id);
+        return <Link key={p.id} className="accessory-item" href={url(p, "accessories")}><div className={`picture${photos.length > 1 ? " model-picture" : ""}`} style={photos.length > 1 ? { "--model-crop-scale": crop.scale, "--model-crop-origin": crop.origin } as CSSProperties : undefined}><Photo src={photos[0].src} alt={`${p.name}, ${colour.name}`} /></div><span>{p.name}</span></Link>;
+      })}</div></section>
     </>;
   }
   function Collection({ dept, category }: { dept: Department; category?: string }) {
@@ -108,7 +131,12 @@ export default function Storefront() {
     const category = p.limited ? back : categoryUrl(dept, dept === "accessories" ? undefined : p.category);
     const returnTo = productReturnPath(pathname, back);
     const returnLabel = returnTo === "/" ? "Home" : returnTo.startsWith("/limited") ? "Limited Edition" : decodeURIComponent(returnTo.split("/").filter(Boolean).map(title).join(" / "));
-    return <section className="product-page"><Breadcrumb><Link href={back}>{p.limited ? "Limited Edition" : title(dept)}</Link><span>/</span>{p.limited ? <span>{p.player}</span> : <Link href={category}>{p.category}</Link>}</Breadcrumb><div className="product-layout"><div className="product-title"><Link className="product-back" href={returnTo}>← {returnLabel}</Link><h1>{p.name}</h1></div><button className={`gallery${enlarged ? " enlarged" : ""}`} onClick={() => setEnlarged(!enlarged)} aria-label={`${enlarged ? "Reduce" : "Enlarge"} ${p.name}`} aria-pressed={enlarged}><Photo src={variant(p).image} alt={`${p.name}, ${variant(p).name}`} eager /></button><div className="product-info"><p className="chosen">{variant(p).name}</p>{swatches(p)}<div className="product-controls"><button onClick={() => setEnlarged(!enlarged)}>{enlarged ? "Reduce image" : "Enlarge image"}</button></div><Link className="category-link" href={p.limited ? "/limited" : category}>{p.limited ? "All limited edition tees" : `All ${dept === "accessories" ? "accessories" : p.category.toLowerCase()}`} →</Link></div></div></section>;
+    const currentVariant = variant(p);
+    const photos = productPhotos(p.id, dept, currentVariant);
+    const photoKey = `${pathname}:${currentVariant.name}`;
+    const photoIndex = photoSelection.key === photoKey ? photoSelection.index : 0;
+    const photo = photos[photoIndex] || photos[0];
+    return <section className="product-page"><Breadcrumb><Link href={back}>{p.limited ? "Limited Edition" : title(dept)}</Link><span>/</span>{p.limited ? <span>{p.player}</span> : <Link href={category}>{p.category}</Link>}</Breadcrumb><div className="product-layout"><div className="product-title"><Link className="product-back" href={returnTo}>← {returnLabel}</Link><h1>{p.name}</h1></div><button className={`gallery${enlarged ? " enlarged" : ""}`} onClick={() => setEnlarged(!enlarged)} aria-label={`${enlarged ? "Reduce" : "Enlarge"} ${p.name}`} aria-pressed={enlarged}><Photo key={photo.src} src={photo.src} alt={`${p.name}, ${currentVariant.name}, ${photo.label.toLowerCase()} view`} eager /></button><div className="product-info"><p className="chosen">{variant(p).name}</p>{swatches(p)}{photos.length > 1 && <div className="product-views" role="group" aria-label="Product views">{photos.map((item, index) => <button key={item.label} type="button" aria-pressed={index === photoIndex} onClick={() => { setPhotoSelection({ key: photoKey, index }); setEnlarged(false); }}>{item.label}</button>)}</div>}<div className="product-controls"><button onClick={() => setEnlarged(!enlarged)}>{enlarged ? "Reduce image" : "Enlarge image"}</button></div><Link className="category-link" href={p.limited ? "/limited" : category}>{p.limited ? "All limited edition tees" : `All ${dept === "accessories" ? "accessories" : p.category.toLowerCase()}`} →</Link></div></div></section>;
   }
   function Limited({ player }: { player?: string }) {
     const current = players.includes(player || "") ? player! : players[0];

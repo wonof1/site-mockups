@@ -147,3 +147,35 @@ html{scroll-behavior:auto}
 .hero-video-toggle{position:absolute;right:4%;top:98px;z-index:1;padding:8px 12px;color:white;background:#0005;border:1px solid #ffffff70;border-radius:2px;font-size:12px}
 html[data-arrival] .hero-video-toggle{visibility:hidden}
 @media(max-width:650px){.hero-video-toggle{right:20px;top:84px}}
+
+/* A fixed model tries on the quarter-zip collection. */
+.qz-showcase{margin:0 auto;max-width:1440px}
+.qz-style-tabs{display:flex;justify-content:center;gap:32px;padding:0 20px 24px}
+.qz-style-tabs button{min-height:44px;font-size:14px;color:#62676b;border-bottom:1px solid transparent}
+.qz-style-tabs button[aria-pressed=true]{color:var(--ink);border-bottom-color:currentColor}
+/* The model sits behind one continuous foreground rail. */
+.qz-stage{position:relative;display:flex;justify-content:center;overflow:hidden;isolation:isolate;touch-action:pan-y;background:linear-gradient(#cdd0db 0%,#cfd2dc 25%,#cdd1db 50%,#cccfd9 75%,#dfe0e4 100%);container-type:inline-size}
+.qz-model{display:block;cursor:zoom-in;position:relative;aspect-ratio:1122/1402;width:min(44%,54svh);overflow:hidden}
+.qz-model img{mask-image:linear-gradient(to right,transparent,#000 12%,#000 88%,transparent);display:block;width:100%;height:100%;object-fit:cover;user-select:none}
+.qz-worn{position:absolute;inset:0}.qz-base{position:relative}
+.qz-rail{position:absolute;inset:0;z-index:2;pointer-events:none}
+.qz-rail-item{position:absolute;left:50%;top:44%;width:min(26cqw,290px);aspect-ratio:1/1.15;margin-top:calc(min(26cqw,290px) * -.575);pointer-events:none}
+.qz-try-on,.qz-garment,.qz-garment-float{display:block;width:100%;height:100%}
+.qz-garment{padding:0}.qz-garment img{width:100%;height:100%;object-fit:contain;user-select:none;-webkit-user-drag:none}
+.qz-garment-float{animation:qz-float 5.4s ease-in-out infinite;animation-play-state:paused}
+.qz-stage[data-floating=true] .qz-garment-float{animation-play-state:running}
+.qz-stage:not([data-phase=idle]) .qz-garment-float{animation:none}
+.qz-garment:focus-visible{outline:1px solid var(--ink);outline-offset:5px}
+@keyframes qz-float{0%,100%{transform:translateY(6px) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
+.qz-motion-toggle,.qz-arrow{position:absolute;z-index:8;bottom:12px;width:44px;height:44px;display:grid;place-items:center;color:#53575b;border:1px solid #ffffffb0;border-radius:50%;background:#ffffffc0}
+.qz-motion-toggle{left:calc(50% - 22px)}.qz-prev{left:16px}.qz-next{right:16px}.qz-arrow{font-size:22px}
+.qz-motion-toggle:hover,.qz-arrow:hover{background:#fff}
+.qz-motion-toggle{left:16px;top:12px;bottom:auto}
+.qz-colours{position:absolute;z-index:8;bottom:12px;left:50%;transform:translateX(-50%);margin:0;gap:5px;padding:5px 8px;border-radius:28px;background:#ffffffb3;backdrop-filter:blur(12px);flex-wrap:nowrap}
+.qz-colours .swatch{width:29px;height:29px}
+.qz-open{position:absolute;z-index:8;right:16px;top:12px;width:44px;height:44px;border-radius:50%;background:#ffffffc0;display:grid;place-items:center;font-size:23px}
+.qz-open:hover{text-decoration:none;background:white}
+.qz-announcement{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.qz-error{font-size:13px;margin:0 0 20px;color:#8a2929}
+@media(max-width:650px){.qz-style-tabs{gap:22px;padding:0 0 20px}.qz-style-tabs button{font-size:13px}.qz-model{width:100%}.qz-rail-item{width:52cqw;margin-top:-29.9cqw}.qz-colours{gap:0;padding:5px}.qz-colours .swatch{width:27px;height:27px}.qz-prev{left:8px}.qz-next{right:8px}}
+@media(prefers-reduced-motion:reduce){.qz-garment-float{animation:none}}

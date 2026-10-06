@@ -8,6 +8,7 @@ import { MobileMenu } from "./MobileMenu";
 import { HeroMedia } from "./HeroMedia";
 import { InstagramFeed } from "./InstagramFeed";
 import catalogue from "./catalogue.json";
+import { QuarterZipShowcase } from "./QuarterZipShowcase";
 import { modelCrop, modelVariantIndex, productPhotos } from "./productMedia";
 import assets from "./assets.json";
 import { useStorePreferences } from "./StorePreferences";
@@ -118,7 +119,7 @@ export default function Storefront() {
   }
   function Collection({ dept, category }: { dept: Department; category?: string }) {
     const items = (dept === "accessories" ? accessories : apparel).filter(p => !category || p.category === category);
-    return <section className="collection"><Breadcrumb>{category ? <><Link href={`/${dept}`}>{title(dept)}</Link><span>/</span><span>{category}</span></> : <span>{title(dept)}</span>}</Breadcrumb><h1>{category || title(dept)}</h1>{dept !== "accessories" && <><nav className="categories" aria-label={`${title(dept)} categories`}><Link href={`/${dept}`} aria-current={!category ? "page" : undefined}>All {dept}</Link>{categories.map(c => <Link key={c} href={categoryUrl(dept, c)} aria-current={c === category ? "page" : undefined}>{c}</Link>)}</nav><label className="mobile-filter"><select aria-label={`${title(dept)} category`} value={categoryUrl(dept, category)} onChange={e => { router.push(e.target.value, { scroll: false }); }}><option value={`/${dept}`}>All {dept}</option>{categories.map(c => <option key={c} value={categoryUrl(dept, c)}>{c}</option>)}</select></label></>}<div className="products">{items.map(p => card(p, dept))}</div></section>;
+    return <section className="collection"><Breadcrumb>{category ? <><Link href={`/${dept}`}>{title(dept)}</Link><span>/</span><span>{category}</span></> : <span>{title(dept)}</span>}</Breadcrumb><h1>{category || title(dept)}</h1>{dept !== "accessories" && <><nav className="categories" aria-label={`${title(dept)} categories`}><Link href={`/${dept}`} aria-current={!category ? "page" : undefined}>All {dept}</Link>{categories.map(c => <Link key={c} href={categoryUrl(dept, c)} aria-current={c === category ? "page" : undefined}>{c}</Link>)}</nav><label className="mobile-filter"><select aria-label={`${title(dept)} category`} value={categoryUrl(dept, category)} onChange={e => { router.push(e.target.value, { scroll: false }); }}><option value={`/${dept}`}>All {dept}</option>{categories.map(c => <option key={c} value={categoryUrl(dept, c)}>{c}</option>)}</select></label></>}{dept === "men" && category === "Quarter-zips" ? <QuarterZipShowcase key={dept} department={dept} /> : <div className="products">{items.map(p => card(p, dept))}</div>}</section>;
   }
   function ProductPage({ p, dept }: { p: Product; dept: string }) {
     // Each player's supplied editions are colour choices on the same product page.
@@ -132,7 +133,9 @@ export default function Storefront() {
     const returnTo = productReturnPath(pathname, back);
     const returnLabel = returnTo === "/" ? "Home" : returnTo.startsWith("/limited") ? "Limited Edition" : decodeURIComponent(returnTo.split("/").filter(Boolean).map(title).join(" / "));
     const currentVariant = variant(p);
-    const photos = productPhotos(p.id, dept, currentVariant);
+    const photos = p.category === "Quarter-zips"
+      ? [{ src: currentVariant.image, label: "Product" }]
+      : productPhotos(p.id, dept, currentVariant);
     const photoKey = `${pathname}:${currentVariant.name}`;
     const photoIndex = photoSelection.key === photoKey ? photoSelection.index : 0;
     const photo = photos[photoIndex] || photos[0];

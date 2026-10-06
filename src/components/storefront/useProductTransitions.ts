@@ -24,6 +24,9 @@ function imageRect(img: HTMLImageElement) {
 }
 
 function cardImage(anchor: HTMLAnchorElement) {
+  if (anchor.hasAttribute("data-quarterzip-product")) {
+    return anchor.closest(".qz-showcase")?.querySelector<HTMLImageElement>(".qz-worn") || null;
+  }
   const picture = anchor.closest(".product-card")?.querySelector(".picture") || anchor;
   return picture.querySelector<HTMLImageElement>("img");
 }
@@ -39,6 +42,76 @@ function imageClip(img: HTMLImageElement, rect: ReturnType<typeof imageRect>) {
 }
 
 let productSnapshot: { path: string; image: HTMLImageElement; rect: ReturnType<typeof imageRect> } | undefined;
+
+// Follow the worn torso into the normal gallery, then dissolve to the flat product.
+function beginQuarterZip(img: HTMLImageElement, href: string) {
+  pending?.cancel();
+  const from = imageRect(img);
+  const ghost = document.createElement("img");
+  ghost.src = img.currentSrc; ghost.alt = "";
+  ghost.dataset.productTransition = "quarterzip";
+  ghost.setAttribute("aria-hidden", "true");
+  Object.assign(ghost.style, { position: "fixed", left: `${from.x}px`, top: `${from.y}px`, width: `${from.width}px`, height: `${from.height}px`, zIndex: "90", pointerEvents: "none", transformOrigin: "top left", objectFit: "contain" });
+  const veil = document.createElement("div");
+  veil.dataset.productTransition = "veil";
+  veil.setAttribute("aria-hidden", "true");
+  veil.inert = true;
+  Object.assign(veil.style, { position: "fixed", inset: "0", background: "white", zIndex: "80", pointerEvents: "none" });
+  const main = document.getElementById("main");
+  if (main) {
+    const scene = main.cloneNode(true) as HTMLElement;
+    scene.removeAttribute("id");
+    scene.querySelectorAll("[id]").forEach(el => el.removeAttribute("id"));
+    scene.querySelectorAll<HTMLElement>(".qz-model").forEach(el => { el.style.visibility = "hidden"; });
+    Object.assign(scene.style, { position: "absolute", width: `${main.offsetWidth}px`, top: `${main.getBoundingClientRect().top}px`, left: `${main.getBoundingClientRect().left}px`, margin: "0" });
+    veil.append(scene);
+  }
+  document.body.append(veil, ghost);
+  ghost.style.maskImage = "linear-gradient(to right,transparent,#000 12%,#000 88%,transparent)";
+  const animations: Animation[] = [];
+  let target: HTMLImageElement | null = null, incoming: HTMLImageElement | null = null;
+  let visibility = "", finished = false, arrived = false;
+  const cleanup = () => {
+    if (finished) return;
+    finished = true;
+    animations.forEach(a => a.cancel());
+    ghost.remove(); veil.remove(); incoming?.remove();
+    if (target) target.style.visibility = visibility;
+    clearTimeout(timeout);
+    if (pending?.cancel === cleanup) pending = undefined;
+    for (const name of ["wheel", "touchstart", "keydown", "pagehide", "resize"]) window.removeEventListener(name, cleanup);
+  };
+  const timeout = window.setTimeout(cleanup, 2500);
+  for (const name of ["wheel", "touchstart", "keydown", "pagehide", "resize"]) window.addEventListener(name, cleanup, { passive: true, once: true });
+  pending = { href, cancel: cleanup, arrive: async () => {
+    if (arrived || finished) return;
+    arrived = true;
+    window.scrollTo({ top: 0, behavior: "instant" });
+    target = document.querySelector<HTMLImageElement>(".gallery img");
+    if (!target) { cleanup(); return; }
+    visibility = target.style.visibility; target.style.visibility = "hidden";
+    await target.decode().catch(() => {});
+    if (finished || !target.naturalWidth) { cleanup(); return; }
+    const to = imageRect(target);
+    const scale = Math.min(to.width / (from.width * .5), to.height / (from.height * .4));
+    const x = to.x + to.width / 2 - from.width * .5 * scale - from.x;
+    const y = to.y + to.height / 2 - from.height * .36 * scale - from.y;
+    const zoom = `translate(${x}px,${y}px) scale(${scale})`;
+    animations.push(ghost.animate([
+      { transform: "none", clipPath: "inset(0% 0% 0% 0%)" },
+      { transform: zoom, clipPath: "inset(16% 25% 44% 25%)" },
+    ], { duration: 850, easing: "cubic-bezier(.4,0,.16,1)", fill: "forwards" }));
+    animations.push(ghost.animate([{ opacity: 1 }, { opacity: 0 }], { delay: 590, duration: 140, fill: "forwards" }));
+    incoming = document.createElement("img"); incoming.src = target.currentSrc; incoming.alt = "";
+    incoming.dataset.productTransition = "incoming";
+    Object.assign(incoming.style, { position: "fixed", left: `${to.x}px`, top: `${to.y}px`, width: `${to.width}px`, height: `${to.height}px`, objectFit: "contain", zIndex: "91", pointerEvents: "none" });
+    document.body.append(incoming);
+    animations.push(veil.animate([{ opacity: 1 }, { opacity: 0 }], { delay: 80, duration: 460, easing: "ease-in-out", fill: "forwards" }));
+    const reveal = incoming.animate([{ clipPath: "inset(0 0 100% 0)", transform: "scale(.98)" }, { clipPath: "inset(0 0 0% 0)", transform: "scale(1)" }], { delay: 460, duration: 440, easing: "cubic-bezier(.22,.8,.2,1)", fill: "both" });
+    animations.push(reveal);
+    void reveal.finished.then(cleanup, cleanup);
+  } };
+}
 
 export function resetProductTransition() {
   pending?.cancel();
@@ -242,6 +315,10 @@ export function useProductTransitions(pathname: string, router: Router) {
   return (event: MouseEvent<HTMLElement>) => {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     const anchor = (event.target as HTMLElement).closest<HTMLAnchorElement>('a[href^="/"]');
+    if (anchor?.hasAttribute("data-quarterzip-product") && (anchor.dataset.busy === "true" || anchor.closest<HTMLElement>(".qz-stage")?.dataset.swiped === "true")) {
+      event.preventDefault();
+      return;
+    }
     pending?.cancel();
     if (!anchor) return;
     const href = anchor.getAttribute("href")!;
@@ -251,6 +328,15 @@ export function useProductTransitions(pathname: string, router: Router) {
       origins.set(destination, { pathname, scroll: window.scrollY });
     }
     if (reduceMotion()) return;
+    if (anchor.hasAttribute("data-quarterzip-product")) {
+      const model = cardImage(anchor);
+      if (model?.naturalWidth) {
+        event.preventDefault();
+        beginQuarterZip(model, destination);
+        router.push(href, { scroll: false });
+        return;
+      }
+    }
     if (isCategoryChange(pathname, destination)) {
       event.preventDefault();
       router.push(href, { scroll: false });

@@ -24,6 +24,7 @@ function imageRect(img: HTMLImageElement) {
 }
 
 function cardImage(anchor: HTMLAnchorElement) {
+  if (anchor.hasAttribute("data-rail-product")) return anchor.closest(".clothing-rail")?.querySelector<HTMLImageElement>('[data-rail-visible="true"] img') || null;
   if (anchor.hasAttribute("data-quarterzip-product")) {
     return anchor.closest(".qz-showcase")?.querySelector<HTMLImageElement>(".qz-worn") || null;
   }
@@ -32,12 +33,17 @@ function cardImage(anchor: HTMLAnchorElement) {
 }
 
 function imageClip(img: HTMLImageElement, rect: ReturnType<typeof imageRect>) {
-  const frame = img.closest(".picture, .gallery")?.getBoundingClientRect();
+  const frame = img.closest(".picture, .gallery, .rail-face")?.getBoundingClientRect();
   if (!frame) return "inset(0% 0% 0% 0%)";
   const top = Math.max(0, frame.top - rect.y) / rect.height * 100;
-  const right = Math.max(0, rect.x + rect.width - frame.right) / rect.width * 100;
+  let right = Math.max(0, rect.x + rect.width - frame.right) / rect.width * 100;
   const bottom = Math.max(0, rect.y + rect.height - frame.bottom) / rect.height * 100;
-  const left = Math.max(0, frame.left - rect.x) / rect.width * 100;
+  let left = Math.max(0, frame.left - rect.x) / rect.width * 100;
+  // Rail photos contain both views; preserve the visible half in the transition.
+  if (img.closest(".rail-face")) {
+    if (img.style.clipPath === "inset(0px 50% 0px 0px)") right = Math.max(right, 50);
+    if (img.style.clipPath === "inset(0px 0px 0px 50%)") left = Math.max(left, 50);
+  }
   return `inset(${top}% ${right}% ${bottom}% ${left}%)`;
 }
 
@@ -227,7 +233,7 @@ function begin(img: HTMLImageElement, href: string, productPath: string, reverse
       const origin = origins.get(productPath);
       if (!reverse) window.scrollTo({ top: 0, behavior: "instant" });
       else if (origin?.pathname === href) window.scrollTo({ top: origin.scroll, behavior: "instant" });
-      const returnCard = reverse ? Array.from(document.querySelectorAll<HTMLAnchorElement>('main a[href]')).find(a => a.getAttribute("href") === productPath && a.querySelector("img")) : null;
+      const returnCard = reverse ? Array.from(document.querySelectorAll<HTMLAnchorElement>('main a[href]')).find(a => a.getAttribute("href") === productPath && (a.querySelector("img") || a.hasAttribute("data-rail-product"))) : null;
       target = reverse ? returnCard ? cardImage(returnCard) : null : document.querySelector<HTMLImageElement>(".gallery img");
       if (target) {
         // Visibility also suppresses the gallery's CSS entrance animation.

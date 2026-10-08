@@ -8,6 +8,7 @@ import { MobileMenu } from "./MobileMenu";
 import { HeroMedia } from "./HeroMedia";
 import { InstagramFeed } from "./InstagramFeed";
 import catalogue from "./catalogue.json";
+import { ClothingRail } from "./ClothingRail";
 import { QuarterZipShowcase } from "./QuarterZipShowcase";
 import { modelCrop, modelVariantIndex, productPhotos } from "./productMedia";
 import assets from "./assets.json";
@@ -109,7 +110,7 @@ export default function Storefront() {
   function Home() {
     return <>
       <section id="top" className="hero"><HeroMedia /><div className="hero-caption"><h1>WON OF ONE</h1><nav className="hero-links" aria-label="Shop apparel"><Link href="/men">Shop men</Link><Link href="/women">Shop women</Link></nav></div></section>
-      <section className="home-selection" aria-labelledby="apparel-heading"><div className="section-heading"><h2 id="apparel-heading">Apparel</h2><nav aria-label="Shop all apparel"><Link className="text-link" href="/men">Shop men →</Link><Link className="text-link" href="/women">Shop women →</Link></nav></div><div className="featured-products">{["court-tee", "court-shorts", "logo-quarter-zip", "wordmark-sweatpants"].map(id => card(product(id), "men"))}</div></section>
+      <ClothingRail />
       <section className="category-stories" aria-label="Shop by category">{[{ id: "wordmark-tee", category: "T-shirts", colour: 3 }, { id: "stripe-quarter-zip", category: "Quarter-zips", colour: 0 }].map(item => { const p = product(item.id), v = p.variants[item.colour]; return <article className="category-story" key={p.id}><Link className="story-image" href={categoryUrl("men", item.category)}><Photo src={v.image} alt={`${p.name}, ${v.name}`} /></Link><div className="story-caption"><h2>{item.category}</h2><nav aria-label={`Shop ${item.category.toLowerCase()}`}><Link href={categoryUrl("men", item.category)}>Men →</Link><Link href={categoryUrl("women", item.category)}>Women →</Link></nav></div></article>; })}</section>
       <section className="home-accessories" aria-labelledby="accessories-heading"><div className="section-heading"><h2 id="accessories-heading">Accessories</h2><Link className="text-link" href="/accessories">Shop all →</Link></div><div className="accessories-row">{accessories.map(p => {
         const colour = variant(p), photos = productPhotos(p.id, "accessories", colour), crop = modelCrop(p.id);

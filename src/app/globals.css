@@ -179,3 +179,48 @@ html[data-arrival] .hero-video-toggle{visibility:hidden}
 .qz-error{font-size:13px;margin:0 0 20px;color:#8a2929}
 @media(max-width:650px){.qz-style-tabs{gap:22px;padding:0 0 20px}.qz-style-tabs button{font-size:13px}.qz-model{width:100%}.qz-rail-item{width:52cqw;margin-top:-29.9cqw}.qz-colours{gap:0;padding:5px}.qz-colours .swatch{width:27px;height:27px}.qz-prev{left:8px}.qz-next{right:8px}}
 @media(prefers-reduced-motion:reduce){.qz-garment-float{animation:none}}
+
+/* A physical clothes rail directly below the homepage film. */
+.clothing-rail{position:relative;background:oklch(97.4% .006 95);padding:64px 0 56px;color:var(--ink);overflow:hidden}
+.rail-heading{display:flex;align-items:baseline;justify-content:space-between;gap:24px;padding:0 5%;margin-bottom:34px}
+.rail-heading h2{font:400 clamp(28px,3.2vw,44px)/1.1 Arial,sans-serif;letter-spacing:-.055em}
+.rail-heading nav{display:flex;gap:28px;font-size:14px}
+.rail-viewport{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain}
+.rail-viewport::-webkit-scrollbar{display:none}
+.rail-track{position:relative;min-width:880px;width:100%;max-width:1500px;height:420px;margin:auto;perspective:1400px;isolation:isolate}
+.clothes-bar{position:absolute;top:23px;left:5%;right:5%;height:7px;border-radius:3px;background:linear-gradient(oklch(73% .008 95),oklch(97% .006 95) 35%,oklch(66% .008 95) 75%,oklch(84% .008 95));box-shadow:0 3px 4px #343a2620}
+.clothes-bar:before,.clothes-bar:after{content:"";position:absolute;top:-3px;width:5px;height:13px;border-radius:2px;background:oklch(71% .01 95)}.clothes-bar:before{left:0}.clothes-bar:after{right:0}
+.rail-item{position:absolute;top:23px;left:0;height:360px;padding:0;perspective:900px;outline-offset:-10px!important;touch-action:pan-x pan-y}
+.rail-turn,.rail-sway{display:block;width:100%;height:100%;transform-style:preserve-3d;transform-origin:50% 0}
+.rail-turn{position:absolute;top:0;pointer-events:none}.rail-sway{animation:rail-sway 5s ease-in-out infinite;animation-play-state:paused}
+.clothing-rail[data-moving=true] .rail-sway{animation-play-state:running}
+.clothes-hanger{position:absolute;left:0;top:0;width:100%;height:auto;aspect-ratio:280/74;color:oklch(45% .01 95)}
+.rail-face{position:absolute;inset:0;backface-visibility:hidden;overflow:visible}
+.rail-face img{position:absolute;max-width:none;user-select:none;-webkit-user-drag:none}
+.rail-back{transform:rotateY(180deg)}
+.rail-caption{display:flex;align-items:center;justify-content:center;gap:55px;margin-top:2px;min-height:96px}
+.rail-description{min-width:220px;text-align:center}.rail-description p{font-size:17px}.rail-description p span{display:block;color:#6b7167;font-size:12px;margin-top:6px}
+.rail-actions{display:flex;justify-content:center;gap:23px;margin-top:16px;font-size:12px}.rail-actions button{padding:0}.rail-actions a,.rail-actions button{min-height:30px;display:inline-flex;align-items:center;border-bottom:1px solid #78807470}
+.rail-arrow{width:44px;height:44px;font-size:24px}.rail-arrow:hover{transform:translateX(3px)}
+.rail-motion{position:absolute;bottom:23px;right:4%;width:40px;height:40px;font-size:16px;color:#6b7167}
+@keyframes rail-sway{0%,100%{transform:rotate(-.5deg)}50%{transform:rotate(.6deg)}}
+@media(max-width:650px){.clothing-rail{padding:40px 0 46px}.rail-heading{padding:0 20px;margin-bottom:28px}.rail-heading nav{gap:18px;font-size:12px}.rail-track{height:350px;min-width:880px}.rail-item{height:310px}.rail-caption{gap:16px;margin-top:0}.rail-description{min-width:210px}.rail-motion{right:8px;bottom:4px}}
+@media(prefers-reduced-motion:reduce){.rail-sway{animation:none}}
+html.reduced .rail-sway{animation:none}
+
+/* Every rail garment uses the same continuous, photo-textured cloth shell. */
+.rail-hanger-turn{position:absolute;inset:0;transform-origin:50% 0;transform-style:preserve-3d}
+.rail-volume{display:block;position:relative;width:100%;aspect-ratio:280/360}
+.rail-volume canvas{display:block;position:absolute;inset:0;width:100%;height:100%;visibility:hidden}
+.rail-volume[data-ready=true] canvas{visibility:visible}
+.rail-volume-fallback{display:block;position:absolute;inset:0;transform-origin:50% 0;backface-visibility:hidden}
+.rail-volume-fallback img{position:absolute;height:auto;max-width:none}
+.rail-volume[data-ready=true] .rail-volume-fallback{visibility:hidden}
+
+.rail-sway{transform-style:flat}
+
+.rail-model { display: block; position: relative; width: 100%; aspect-ratio: 280 / 360; }
+.rail-model canvas { position: absolute; inset: 0; width: 100%; height: 100%; visibility: hidden; }
+.rail-face .rail-model-fallback { inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.rail-model[data-ready="true"] canvas { visibility: visible; }
+.rail-model[data-ready="true"] .rail-model-fallback { visibility: hidden; }

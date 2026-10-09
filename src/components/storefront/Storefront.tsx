@@ -10,6 +10,7 @@ import { InstagramFeed } from "./InstagramFeed";
 import catalogue from "./catalogue.json";
 import { ClothingRail } from "./ClothingRail";
 import { QuarterZipShowcase } from "./QuarterZipShowcase";
+import { QuarterZipProduct } from "./QuarterZipProduct";
 import { modelCrop, modelVariantIndex, productPhotos } from "./productMedia";
 import assets from "./assets.json";
 import { useStorePreferences } from "./StorePreferences";
@@ -133,10 +134,9 @@ export default function Storefront() {
     const category = p.limited ? back : categoryUrl(dept, dept === "accessories" ? undefined : p.category);
     const returnTo = productReturnPath(pathname, back);
     const returnLabel = returnTo === "/" ? "Home" : returnTo.startsWith("/limited") ? "Limited Edition" : decodeURIComponent(returnTo.split("/").filter(Boolean).map(title).join(" / "));
+    if (p.category === "Quarter-zips") return <section className="product-page"><Breadcrumb><Link href={back}>{title(dept)}</Link><span>/</span><Link href={category}>{p.category}</Link></Breadcrumb><QuarterZipProduct key={`${dept}:${p.id}`} id={p.id} name={p.name} department={dept} variants={p.variants} colourIndex={selectedIndex(p)} chooseColour={index => choose(p, index)} returnTo={returnTo} returnLabel={returnLabel} category={category} /></section>;
     const currentVariant = variant(p);
-    const photos = p.category === "Quarter-zips"
-      ? [{ src: currentVariant.image, label: "Product" }]
-      : productPhotos(p.id, dept, currentVariant);
+    const photos = productPhotos(p.id, dept, currentVariant);
     const photoKey = `${pathname}:${currentVariant.name}`;
     const photoIndex = photoSelection.key === photoKey ? photoSelection.index : 0;
     const photo = photos[photoIndex] || photos[0];

@@ -23,6 +23,20 @@ function imageRect(img: HTMLImageElement) {
   return { x: rect.x + (rect.width - width) / 2, y: rect.y + (rect.height - height) / 2, width, height };
 }
 
+// A scrolling gallery can have several images; leave from the visible angle.
+function visibleGalleryImage() {
+  const images = Array.from(document.querySelectorAll<HTMLImageElement>(".gallery img"));
+  let selected = images[0] || null;
+  let largest = 0;
+  for (const image of images) {
+    if (!image.naturalWidth) continue;
+    const rect = imageRect(image);
+    const visible = Math.max(0, Math.min(innerHeight, rect.y + rect.height) - Math.max(0, rect.y)) * Math.max(0, Math.min(innerWidth, rect.x + rect.width) - Math.max(0, rect.x));
+    if (visible > largest) { largest = visible; selected = image; }
+  }
+  return selected;
+}
+
 function cardImage(anchor: HTMLAnchorElement) {
   if (anchor.hasAttribute("data-rail-product")) return anchor.closest(".clothing-rail")?.querySelector<HTMLImageElement>('[data-rail-visible="true"] img') || null;
   if (anchor.hasAttribute("data-quarterzip-product")) {
@@ -302,17 +316,20 @@ export function useProductTransitions(pathname: string, router: Router) {
   useLayoutEffect(() => {
     if (!pathname.startsWith("/product/")) return;
     const capture = () => {
-      const image = document.querySelector<HTMLImageElement>(".gallery img");
+      const image = visibleGalleryImage();
       if (image?.naturalWidth) productSnapshot = { path: pathname, image, rect: imageRect(image) };
     };
     capture();
-    const image = document.querySelector<HTMLImageElement>(".gallery img");
+    const image = visibleGalleryImage();
     let active = true;
     void image?.decode().then(() => { if (active) capture(); }).catch(() => {});
+    const loaded = (event: Event) => { if (event.target instanceof HTMLImageElement && event.target.closest(".gallery")) capture(); };
+    document.addEventListener("load", loaded, true);
     window.addEventListener("scroll", capture, { passive: true });
     window.addEventListener("resize", capture);
     return () => {
       active = false;
+      document.removeEventListener("load", loaded, true);
       window.removeEventListener("scroll", capture);
       window.removeEventListener("resize", capture);
     };
@@ -349,7 +366,7 @@ export function useProductTransitions(pathname: string, router: Router) {
       return;
     }
     const reverse = pathname.startsWith("/product/") && !destination.startsWith("/product/");
-    const img = reverse ? document.querySelector<HTMLImageElement>(".gallery img")
+    const img = reverse ? visibleGalleryImage()
       : cardImage(anchor);
     event.preventDefault();
     if (anchor.classList.contains("brand") || !img?.naturalWidth || (!reverse && !destination.startsWith("/product/"))) {

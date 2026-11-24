@@ -1,41 +1,16 @@
-# WON OF ONE standalone mockup
+# Won of One storefront
 
-A copy of the current design prototype, separated from the main store repository.
+Use Node.js 22 or newer. Run `npm ci` and `npm run dev`, then open [the storefront](http://127.0.0.1:3101/). Use `npm run build` followed by `npm start` for a production preview.
 
-## Run
-Requires Node.js 22 or newer.
+The active Next.js pages render `src/components/storefront/Storefront.tsx`. The [men’s](http://127.0.0.1:3101/men) and [women’s](http://127.0.0.1:3101/women) departments share the two unisex styles. The approved CAD prices and Shopify placeholder images are in `src/components/storefront/launch-styles.ts`. The homepage rail, department pages, and product routes all use the same launch assortment.
 
-```sh
-npm install
-npm run dev
-```
+## Shopify checkout
 
-Open http://127.0.0.1:3101/#home. Port 3101 avoids the original preview on 3100.
+The preview works without credentials. To enable checkout for launch, configure the server environment variable `SHOPIFY_STOREFRONT_ACCESS_TOKEN` with a Storefront API public access token for the Won of One store. Publish the products to the appropriate sales channels, including the Online Store for cart permalinks. Keep product handles and colour option values in sync with the snapshot.
 
-## Included
-React/Next.js source, animations, cursor, 14 clothing-drop styles and a separate Limited Edition gallery with 12 player tees, colour selectors, sample bag and checkout screens, local images and fonts. The catalogue and all supplied colour variants live in src/components/storefront-mockup/drop-data.json. Hoodies are intentionally excluded. Edit src/components/storefront-mockup/.
+Product pages offer sizes returned by Shopify for the selected colour when the variant is available and its Canadian price matches the displayed price. Buy now opens Shopify Checkout with one unit of that size and colour. Draft styles display Coming soon.
 
-## Not included
-Commerce backend, Supabase, Stripe, admin, database, credentials or deployment infrastructure. No environment variables are required. Products are hardcoded; the bag resets on reload. Checkout and contact forms are demonstrations only. Apparel images are concepts, not final retail photography.
-
-The original repository and branch remain unchanged by this export.
-
-## Checks
-npm run typecheck
-npm run build
-
-Motion reference attribution is in MOTION-LICENSE.txt; font licensing is in public/fonts/.
-
-## Clothing drop preview
-
-- Main catalogue: http://127.0.0.1:3101/#shop
-- Player tees: http://127.0.0.1:3101/#limited
-- Source: user-supplied September 2026 PDFs. Surrounding document copy is not used.
-- Product artwork was extracted from the PDFs; pale garments and overlapping socks received background cleanup. Front/back pairs remain together to preserve the supplied design.
-- No retail prices, inventory, release dates, or edition quantities are asserted.
-
-If reusing dependencies via a symlink from the original repository, use `npm run dev -- --webpack`. A normal `npm install` does not need this override.
-
+Run `npm run typecheck` and `npm run build` to check changes. Motion attribution is in MOTION-LICENSE.txt and font licensing is in public/fonts/.
 
 ## Instagram section
 

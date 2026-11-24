@@ -47,6 +47,7 @@ export function QuarterZipProduct({ id, name, department, variants, colourIndex,
       </figure>)}
     </div>
     <div className="product-info">
+      <p className="launch-status">Design preview</p>
       <p className="chosen">{current.name}</p>
       <div className="swatches" aria-label={`${name} colours`}>{variants.map((variant, index) => <button key={variant.name} className="swatch" aria-label={variant.name} aria-pressed={colourIndex === index} style={{ "--colour": variant.hex } as CSSProperties} onClick={() => changeColour(index)}><i /></button>)}</div>
       {hasModel && <div className="qz-view-mode" role="group" aria-label="Photography" aria-controls="quarterzip-gallery">

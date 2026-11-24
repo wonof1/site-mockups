@@ -251,3 +251,24 @@ html.reduced .rail-sway{animation:none}
   .qz-product-layout .swatches { margin-bottom: 12px; }
   .qz-view-mode { gap: 28px; }
 }
+
+/* Launch merchandise within the lookbook's existing product layouts. */
+.card-price, .launch-status { margin: .5rem 0; font-size: .875rem; }
+.detail-price { margin: 0 0 1rem; font-size: 1.125rem; }
+.lookbook-title { margin: 3rem 0 1.5rem; }
+.launch-purchase { display: grid; max-width: 22rem; gap: .75rem; margin: 1rem 0; }
+.launch-purchase label { display: grid; gap: .375rem; }
+.launch-purchase select, .launch-purchase button, .buy-link { padding: .75rem 1rem; font: inherit; }
+.buy-link { background: var(--ink, #181818); color: white; text-align: center; }
+
+.hero { background: #334637 url("/storefront/court.jpg") center / cover no-repeat; }
+@media (prefers-reduced-motion: reduce) {
+  .rail-motion, .qz-motion-toggle { display: none; }
+}
+
+.launch-rail { padding: clamp(40px, 6vw, 88px) 0; }
+.launch-rail-controls { display: flex; gap: 8px; }
+.launch-rail-controls button { background: transparent; border: 1px solid var(--line); padding: 8px 14px; cursor: pointer; }
+.launch-rail-track { display: grid; grid-auto-flow: column; grid-auto-columns: clamp(220px, 27vw, 420px); gap: 20px; overflow-x: auto; padding: 0 5% 16px; scroll-padding-inline: 5%; scroll-snap-type: x proximity; }
+.launch-rail-track .product-card { scroll-snap-align: start; }
+.launch-rail-track .picture { height: auto; aspect-ratio: 4 / 5; }

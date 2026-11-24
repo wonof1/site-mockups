@@ -21,7 +21,6 @@ export function MobileMenu({ open, close, groups }: { open: boolean; close: () =
     <div className="drawer-top"><span>WON OF ONE</span><button onClick={close} aria-label="Close menu" autoFocus>Close <span aria-hidden="true">×</span></button></div>
     <nav aria-label="Mobile shop departments" className="drawer-departments">
       {groups.map(group => <details key={group.label} name="shop-department"><summary>{group.label}<span aria-hidden="true" /></summary><div className="drawer-links"><Link href={group.href} onClick={close}>Shop all {group.label.toLowerCase()} <span aria-hidden="true">↗</span></Link>{group.links.map(link => <Link key={link.href} href={link.href} onClick={close}>{link.label}</Link>)}</div></details>)}
-      <Link className="drawer-limited" href="/limited" onClick={close}>Limited Edition <span aria-hidden="true">↗</span></Link>
     </nav>
     <div className="drawer-bottom"><Link href="/#top" onClick={close}>Home</Link><a href="https://www.instagram.com/wo1_padel/" target="_blank" rel="noopener noreferrer">Instagram ↗</a></div>
   </dialog>;

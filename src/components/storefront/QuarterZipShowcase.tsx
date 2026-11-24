@@ -135,9 +135,9 @@ export function QuarterZipShowcase({ department }: { department: string }) {
           </motion.div>;
         })}
       </div>
-      {!reduce && <button className="qz-motion-toggle" aria-label={floating ? "Pause floating motion" : "Resume floating motion"} onClick={() => setFloating(value => !value)}>
+      <button className="qz-motion-toggle" aria-label={floating ? "Pause floating motion" : "Resume floating motion"} onClick={() => setFloating(value => !value)}>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">{floating ? <><path d="M3 2h2v10H3z" /><path d="M9 2h2v10H9z" /></> : <path d="m4 2 8 5-8 5z" />}</svg>
-      </button>}
+      </button>
       <button className="qz-arrow qz-prev" onClick={() => move(-1)} aria-label="Previous colour">←</button>
       <button className="qz-arrow qz-next" onClick={() => move(1)} aria-label="Next colour">→</button>
       <div className="qz-colours swatches" role="group" aria-label={`${product.name} colours`}>{product.variants.map((v, i) => <button key={v.name} className="swatch" aria-label={v.name} title={v.name} aria-pressed={wrap(cursor.position) === i} style={{ "--colour": v.hex } as CSSProperties} onClick={() => chooseColour(i)}><i /></button>)}</div>

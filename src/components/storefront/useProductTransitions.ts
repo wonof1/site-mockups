@@ -1,6 +1,7 @@
 "use client";
 
-import { useLayoutEffect, useRef, type MouseEvent } from "react";
+import { useLayoutEffect, type MouseEvent } from "react";
+import { ease, prefersReducedMotion } from "./motion";
 
 type Router = { push: (href: string, options?: { scroll?: boolean }) => void };
 type Pending = { href: string; arrive: () => void; cancel: () => void };
@@ -9,7 +10,10 @@ const origins = new Map<string, { pathname: string; scroll: number }>();
 export function productReturnPath(productPath: string, fallback: string) {
   return origins.get(productPath)?.pathname || fallback;
 }
-const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.classList.contains("reduced");
+const reduceMotion = prefersReducedMotion;
+// Some supplier PNGs carry a 1px grey keyline; the page CSS trims it, so the ghost must too.
+const EDGE = 0.6;
+const FULL_CLIP = `inset(${EDGE}% ${EDGE}% ${EDGE}% ${EDGE}%)`;
 
 function isCategoryChange(from: string, to: string) {
   const a = from.split("/").filter(Boolean), b = to.split("/").filter(Boolean);
@@ -43,16 +47,19 @@ function cardImage(anchor: HTMLAnchorElement) {
     return anchor.closest(".qz-showcase")?.querySelector<HTMLImageElement>(".qz-worn") || null;
   }
   const picture = anchor.closest(".product-card")?.querySelector(".picture") || anchor;
+  // A hovered card is showing its back photograph; leave from what the shopper sees.
+  const back = picture.matches(":hover") ? picture.querySelector<HTMLImageElement>("img.card-back") : null;
+  if (back?.complete && back.naturalWidth) return back;
   return picture.querySelector<HTMLImageElement>("img");
 }
 
 function imageClip(img: HTMLImageElement, rect: ReturnType<typeof imageRect>) {
   const frame = img.closest(".picture, .gallery, .rail-face")?.getBoundingClientRect();
-  if (!frame) return "inset(0% 0% 0% 0%)";
-  const top = Math.max(0, frame.top - rect.y) / rect.height * 100;
-  let right = Math.max(0, rect.x + rect.width - frame.right) / rect.width * 100;
-  const bottom = Math.max(0, rect.y + rect.height - frame.bottom) / rect.height * 100;
-  let left = Math.max(0, frame.left - rect.x) / rect.width * 100;
+  if (!frame) return FULL_CLIP;
+  const top = Math.max(EDGE, Math.max(0, frame.top - rect.y) / rect.height * 100);
+  let right = Math.max(EDGE, Math.max(0, rect.x + rect.width - frame.right) / rect.width * 100);
+  const bottom = Math.max(EDGE, Math.max(0, rect.y + rect.height - frame.bottom) / rect.height * 100);
+  let left = Math.max(EDGE, Math.max(0, frame.left - rect.x) / rect.width * 100);
   // Rail photos contain both views; preserve the visible half in the transition.
   if (img.closest(".rail-face")) {
     if (img.style.clipPath === "inset(0px 50% 0px 0px)") right = Math.max(right, 50);
@@ -60,6 +67,9 @@ function imageClip(img: HTMLImageElement, rect: ReturnType<typeof imageRect>) {
   }
   return `inset(${top}% ${right}% ${bottom}% ${left}%)`;
 }
+
+// Routes remount the storefront, so a ref would forget where navigation came from.
+let lastPath: string | null = null;
 
 let productSnapshot: { path: string; image: HTMLImageElement; rect: ReturnType<typeof imageRect> } | undefined;
 
@@ -127,7 +137,7 @@ function beginQuarterZip(img: HTMLImageElement, href: string) {
     Object.assign(incoming.style, { position: "fixed", left: `${to.x}px`, top: `${to.y}px`, width: `${to.width}px`, height: `${to.height}px`, objectFit: "contain", zIndex: "91", pointerEvents: "none" });
     document.body.append(incoming);
     animations.push(veil.animate([{ opacity: 1 }, { opacity: 0 }], { delay: 80, duration: 460, easing: "ease-in-out", fill: "forwards" }));
-    const reveal = incoming.animate([{ clipPath: "inset(0 0 100% 0)", transform: "scale(.98)" }, { clipPath: "inset(0 0 0% 0)", transform: "scale(1)" }], { delay: 460, duration: 440, easing: "cubic-bezier(.22,.8,.2,1)", fill: "both" });
+    const reveal = incoming.animate([{ clipPath: "inset(0 0 100% 0)", transform: "scale(.98)" }, { clipPath: "inset(0 0 0% 0)", transform: "scale(1)" }], { delay: 460, duration: 440, easing: ease, fill: "both" });
     animations.push(reveal);
     void reveal.finished.then(cleanup, cleanup);
   } };
@@ -179,7 +189,7 @@ function transitionPage(href: string, navigate: () => void) {
       if (done) return;
       const hero = document.querySelector("#main .hero") || document.getElementById("main");
       const duration = mode === "curtain" ? 760 : mode === "home" ? 700 : 540;
-      const easing = "cubic-bezier(.22,.8,.2,1)";
+      const easing = ease;
       const incomingFrames: Keyframe[] = mode === "home"
         ? [{ transform: "scale(1.09)", opacity: .55 }, { transform: "none", opacity: 1 }]
         : mode === "curtain"
@@ -208,12 +218,12 @@ function begin(img: HTMLImageElement, href: string, productPath: string, reverse
   if (!img.naturalWidth || reduceMotion()) return;
   const from = capturedRect || imageRect(img);
   // Preserve the visible crop, including a click before the hover zoom finishes.
-  const fromClip = capturedRect ? "inset(0% 0% 0% 0%)" : imageClip(img, from);
+  const fromClip = capturedRect ? FULL_CLIP : imageClip(img, from);
   const ghost = document.createElement("img");
   ghost.src = img.currentSrc; ghost.alt = "";
   ghost.dataset.productTransition = reverse ? "return" : "image";
   ghost.setAttribute("aria-hidden", "true");
-  Object.assign(ghost.style, { position: "fixed", left: from.x + "px", top: from.y + "px", width: from.width + "px", height: from.height + "px", objectFit: "contain", clipPath: fromClip, zIndex: "90", pointerEvents: "none", transformOrigin: "top left", willChange: "transform,opacity,clip-path" });
+  Object.assign(ghost.style, { position: "fixed", left: from.x + "px", top: from.y + "px", width: from.width + "px", height: from.height + "px", objectFit: "contain", clipPath: fromClip, mixBlendMode: "multiply", zIndex: "90", pointerEvents: "none", transformOrigin: "top left", willChange: "transform,opacity,clip-path" });
   const veil = document.createElement("div");
   veil.dataset.productTransition = "veil";
   veil.setAttribute("aria-hidden", "true");
@@ -269,10 +279,10 @@ function begin(img: HTMLImageElement, href: string, productPath: string, reverse
           incoming.src = target.currentSrc; incoming.alt = "";
           incoming.dataset.productTransition = "incoming";
           incoming.setAttribute("aria-hidden", "true");
-          Object.assign(incoming.style, { position: "fixed", left: to.x + "px", top: to.y + "px", width: to.width + "px", height: to.height + "px", objectFit: "contain", clipPath: imageClip(target, to), zIndex: "91", pointerEvents: "none", willChange: "transform,opacity" });
+          Object.assign(incoming.style, { position: "fixed", left: to.x + "px", top: to.y + "px", width: to.width + "px", height: to.height + "px", objectFit: "contain", clipPath: imageClip(target, to), mixBlendMode: "multiply", zIndex: "91", pointerEvents: "none", willChange: "transform,opacity" });
           document.body.append(incoming);
           animations.push(ghost.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-8px) scale(.985)" }], { duration: 260, easing: "ease-out", fill: "forwards" }));
-          const reveal = incoming.animate([{ opacity: 0, transform: "translateY(12px) scale(.985)" }, { opacity: 1, transform: "none" }], { delay: 90, duration: 450, easing: "cubic-bezier(.22,.8,.2,1)", fill: "both" });
+          const reveal = incoming.animate([{ opacity: 0, transform: "translateY(12px) scale(.985)" }, { opacity: 1, transform: "none" }], { delay: 90, duration: 450, easing: ease, fill: "both" });
           animations.push(reveal);
           void reveal.finished.then(cleanup, cleanup);
           return;
@@ -281,7 +291,7 @@ function begin(img: HTMLImageElement, href: string, productPath: string, reverse
           { transform: "translate(0,0) scale(1)", opacity: 1, clipPath: fromClip },
           onScreen && target ? { transform: "translate(" + (to.x - from.x) + "px," + (to.y - from.y) + "px) scale(" + to.width / from.width + ")", opacity: 1, clipPath: imageClip(target, to) }
             : { transform: "translateY(24px) scale(.94)", opacity: 0 }
-        ], { duration: reverse ? 620 : 580, easing: "cubic-bezier(.22,.8,.2,1)", fill: "forwards" });
+        ], { duration: reverse ? 620 : 580, easing: ease, fill: "forwards" });
         animations.push(animation);
         void animation.finished.then(cleanup, cleanup);
       }));
@@ -290,14 +300,14 @@ function begin(img: HTMLImageElement, href: string, productPath: string, reverse
 }
 
 export function useProductTransitions(pathname: string, router: Router) {
-  const previousPath = useRef(pathname);
   useLayoutEffect(() => {
-    const categoryChange = isCategoryChange(previousPath.current, pathname);
-    previousPath.current = pathname;
+    const from = lastPath ?? pathname;
+    const categoryChange = isCategoryChange(from, pathname);
+    lastPath = pathname;
     if (categoryChange && !reduceMotion()) {
       document.querySelectorAll(".products .product-card").forEach((card, index) => {
         card.animate([{ opacity: 0, transform: "translateY(14px)" }, { opacity: 1, transform: "none" }], {
-          duration: 380, delay: Math.min(index, 5) * 35, easing: "cubic-bezier(.16,1,.3,1)", fill: "backwards"
+          duration: 380, delay: Math.min(index, 5) * 35, easing: ease, fill: "backwards"
         });
       });
     }
@@ -308,6 +318,14 @@ export function useProductTransitions(pathname: string, router: Router) {
       begin(productSnapshot.image, pathname, productSnapshot.path, true, productSnapshot.rect);
     }
     if (pending) pending.arrive();
+    else if (from.startsWith("/product/") && !pathname.startsWith("/product/")) {
+      // No animated return (reduced motion): still land where the shopper left.
+      const origin = origins.get(from);
+      if (origin?.pathname === pathname) window.scrollTo({ top: origin.scroll, behavior: "instant" });
+    } else if (from !== pathname && pathname.startsWith("/product/")) {
+      // Next keeps scroll when the incoming page is visible; a product always opens at its top.
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
     if (!pathname.startsWith("/product/")) { productSnapshot = undefined; return; }
   }, [pathname]);
 
@@ -350,7 +368,14 @@ export function useProductTransitions(pathname: string, router: Router) {
     if (destination.startsWith("/product/") && !pathname.startsWith("/product/")) {
       origins.set(destination, { pathname, scroll: window.scrollY });
     }
-    if (reduceMotion()) return;
+    const reverse = pathname.startsWith("/product/") && !destination.startsWith("/product/");
+    if (reduceMotion()) {
+      // Next would otherwise scroll to the top after the commit; keep the saved position.
+      // Product opens are scrolled to the top in the layout effect instead of to <main>.
+      const restoring = reverse && origins.get(pathname)?.pathname === destination;
+      if (restoring || destination.startsWith("/product/")) { event.preventDefault(); router.push(href, { scroll: false }); }
+      return;
+    }
     if (anchor.hasAttribute("data-quarterzip-product")) {
       const model = cardImage(anchor);
       if (model?.naturalWidth) {
@@ -365,7 +390,6 @@ export function useProductTransitions(pathname: string, router: Router) {
       router.push(href, { scroll: false });
       return;
     }
-    const reverse = pathname.startsWith("/product/") && !destination.startsWith("/product/");
     const img = reverse ? visibleGalleryImage()
       : cardImage(anchor);
     event.preventDefault();

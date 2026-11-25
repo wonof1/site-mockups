@@ -7,23 +7,39 @@ import { productReturnPath, transitionHome, useProductTransitions } from "./useP
 import { MobileMenu } from "./MobileMenu";
 import { HeroMedia } from "./HeroMedia";
 import { InstagramFeed } from "./InstagramFeed";
-import { catalogue, departments, departmentCategories, departmentProducts, formatPrice, isDepartment, type Department, type Product } from "./catalog";
+import { backImage, catalogue, departments, departmentCategories, departmentProducts, formatPrice, isDepartment, photoStatus, photoStatusLabel, type Department, type Product, type Variant } from "./catalog";
 import { PurchaseOptions } from "./PurchaseOptions";
 import type { BuyOption } from "./shopify";
 import { ClothingRail } from "./ClothingRail";
 import assets from "./assets.json";
 import { useStorePreferences } from "./StorePreferences";
+import { scrollBehavior } from "./motion";
 
 const title = (s: string) => ({ men: "Men", women: "Women", unisex: "Unisex" }[s] || s);
 const url = (p: Product, dept: string) => `/product/${dept}/${p.id}`;
 const categoryUrl = (dept: string, category?: string) => `/${dept}${category ? "/" + encodeURIComponent(category) : ""}`;
-function Photo({ src, alt, eager = false }: { src: string; alt: string; eager?: boolean }) {
-  return <img src={src} alt={alt} loading={eager ? "eager" : "lazy"} decoding="async" />;
+function Photo({ src, alt, eager = false, className }: { src: string; alt: string; eager?: boolean; className?: string }) {
+  return <img src={src} alt={alt} className={className} loading={eager ? "eager" : "lazy"} decoding="async" />;
 }
 
-  function Breadcrumb({ children }: { children: ReactNode }) {
-    return <nav className="breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link><span>/</span>{children}</nav>;
-  }
+function Breadcrumb({ children }: { children: ReactNode }) {
+  return <nav className="breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link><span aria-hidden="true">/</span>{children}</nav>;
+}
+
+// Placeholder and preview art stays labelled wherever it appears.
+function PhotoFlag({ variant }: { variant: Variant }) {
+  const label = photoStatusLabel[photoStatus(variant)];
+  return label ? <span className="photo-flag">{label}</span> : null;
+}
+function altText(p: Product, v: Variant, view?: string) {
+  const status = photoStatus(v);
+  const note = status === "placeholder" ? " (placeholder image)" : status === "preview" ? " (colour preview)" : "";
+  return `${p.name}, ${v.name}${view ? `, ${view}` : ""}${note}`;
+}
+// Each route remounts Storefront, so the previous path must outlive the component.
+let lastPath: string | null = null;
+const styleCount = catalogue.length;
+const colourCount = catalogue.reduce((sum, p) => sum + p.variants.length, 0);
 
 export default function Storefront({ buyOptions = [] }: { buyOptions?: BuyOption[] }) {
   const pathname = usePathname();
@@ -50,7 +66,6 @@ export default function Storefront({ buyOptions = [] }: { buyOptions?: BuyOption
   const menu = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLAnchorElement | HTMLButtonElement | null>(null);
   const suppressFocus = useRef(false);
-  const previousPath = useRef(pathname);
   // Trying a colour on the detail page must not overwrite the originating card.
   const selectedIndex = (p: Product) => page === "product" && p.id === parts[2] && productColour?.path === pathname
     ? productColour.index : selected[p.id] ?? 0;
@@ -66,9 +81,28 @@ export default function Storefront({ buyOptions = [] }: { buyOptions?: BuyOption
     setOpen(null); setEnlarged(false);
     setProductColour(null);
     setBackViewSku(null);
-    if (previousPath.current !== pathname) main.current?.focus({ preventScroll: true });
-    previousPath.current = pathname;
+    const from = lastPath;
+    lastPath = pathname;
+    if (from && from !== pathname) {
+      // Coming back from a product, resume on the card the shopper opened.
+      const links = from.startsWith("/product/") ? Array.from(main.current?.querySelectorAll<HTMLAnchorElement>("a[href]") ?? []).filter(a => a.getAttribute("href") === from) : [];
+      const card = links.find(a => a.closest("h2")) ?? links[0];
+      (card ?? main.current)?.focus({ preventScroll: true });
+    }
   }, [pathname]);
+
+  // Warm the next likely photos: this colour's back view and every other colour's front.
+  const viewing = page === "product" ? catalogue.find(item => item.id === parts[2]) : undefined;
+  const viewingSku = viewing ? variant(viewing).sku : undefined;
+  useEffect(() => {
+    if (!viewing) return;
+    const current = viewing.variants.find(v => v.sku === viewingSku);
+    const urls: string[] = [current && backImage(current), ...viewing.variants.filter(v => v !== current).map(v => v.image)]
+      .flatMap(src => typeof src === "string" ? [src] : []);
+    const timer = window.setTimeout(() => urls.forEach(src => { const img = new Image(); img.decoding = "async"; img.src = src; }), 250);
+    return () => clearTimeout(timer);
+  }, [viewing, viewingSku]);
+
   useEffect(() => {
     const closeOutside = (e: Event) => { if (!navigation.current?.contains(e.target as Node)) setOpen(null); };
     const escape = (e: KeyboardEvent) => {
@@ -86,27 +120,37 @@ export default function Storefront({ buyOptions = [] }: { buyOptions?: BuyOption
   }, []);
 
   function swatches(p: Product) {
-    return <div className="swatches" aria-label={`${p.name} colours`}>{p.variants.map((v, i) => <button key={v.name} className="swatch" aria-label={v.name} aria-pressed={selectedIndex(p) === i} style={{ "--colour": v.hex } as CSSProperties} onClick={() => choose(p, i)}><i /></button>)}</div>;
+    return <div className="swatches" role="group" aria-label={`${p.name} colours`}>{p.variants.map((v, i) => <button key={v.name} className="swatch" aria-label={v.name} title={v.name} aria-pressed={selectedIndex(p) === i} style={{ "--colour": v.hex } as CSSProperties} onClick={() => choose(p, i)}><i /></button>)}</div>;
   }
   function card(p: Product, dept: string) {
     const colour = variant(p);
+    const back = backImage(colour);
     return <article key={p.id} className="product-card">
-      <Link className="picture" href={url(p, dept)}>
-        <Photo src={colour.image} alt={`${p.name}, ${colour.name}`} />
+      <Link className={`picture${back ? " has-back" : ""}`} href={url(p, dept)}>
+        <Photo src={colour.image} alt={altText(p, colour, back ? "front" : undefined)} />
+        {back && <Photo className="card-back" src={back} alt="" />}
+        <PhotoFlag variant={colour} />
       </Link>
-      <h2><Link href={url(p, dept)}>{p.name}</Link></h2><p className="card-colour">{colour.name}</p><p className="card-price">{formatPrice(p.price)}</p>{swatches(p)}
+      <h2><Link href={url(p, dept)}>{p.name}</Link></h2>
+      <p className="card-price">{formatPrice(p.price)}</p>
+      <p className="card-colour">{colour.name}<span aria-hidden="true"> · </span>{p.variants.length} colours</p>
+      {p.treatment && <p className="card-treatment">{p.treatment.mark}</p>}
+      {swatches(p)}
     </article>;
   }
   function Home() {
     return <>
-      <section id="top" className="hero"><HeroMedia /><div className="hero-caption"><h1>WON OF ONE</h1><nav className="hero-links" aria-label="Shop apparel"><Link href="/men">Shop men</Link><Link href="/women">Shop women</Link></nav></div></section>
-      <ClothingRail>{catalogue.map(p => card(p, p.audience.toLowerCase()))}</ClothingRail>
+      <section id="top" className="hero"><HeroMedia /><div className="hero-caption"><div className="hero-title"><p className="hero-eyebrow">Collection 001 · Padel apparel</p><h1>WON OF ONE</h1></div><nav className="hero-links" aria-label="Shop apparel"><Link href="/men">Shop men</Link><Link href="/women">Shop women</Link></nav></div></section>
+      <ClothingRail title="Collection 001" count={styleCount} summary={<>{styleCount} styles · {colourCount} colourways</>}>{catalogue.map(p => card(p, p.audience.toLowerCase()))}</ClothingRail>
       <section className="category-stories" aria-label="Shop by category">
-        {catalogue.filter(p => p.id === "men-s-athletic-shorts-wo1" || p.id === "women-s-cross-back-tank-won-of-one").map(p => {
+        {/* Shorts lead with M02's verified photography; tanks only have placeholders and say so. */}
+        {([["men-s-athletic-shorts-won-of-one", "Khaki"], ["women-s-cross-back-tank-won-of-one", "Black"]] as const).map(([id, colourName]) => {
+          const p = catalogue.find(item => item.id === id);
+          if (!p) return null;
           const href = categoryUrl(p.audience.toLowerCase(), p.category);
-          const colour = p.variants[0];
+          const colour = p.variants.find(v => v.name === colourName) ?? p.variants[0];
           return <article className="category-story" key={p.id}>
-            <Link className="story-image" href={href}><Photo src={colour.image} alt={`${p.name}, ${colour.name}`} /></Link>
+            <Link className="story-image" href={href} tabIndex={-1} aria-hidden="true"><Photo src={colour.image} alt="" /><PhotoFlag variant={colour} /></Link>
             <div className="story-caption"><h2>{p.category}</h2><Link href={href}>Shop {p.audience.toLowerCase()}’s {p.category.toLowerCase()} →</Link></div>
           </article>;
         })}
@@ -116,7 +160,13 @@ export default function Storefront({ buyOptions = [] }: { buyOptions?: BuyOption
   function Collection({ dept, category }: { dept: Department; category?: string }) {
     const categories = departmentCategories(dept);
     const items = departmentProducts(dept).filter(p => !category || p.category === category);
-    return <section className="collection"><Breadcrumb>{category ? <><Link href={`/${dept}`}>{title(dept)}</Link><span>/</span><span>{category}</span></> : <span>{title(dept)}</span>}</Breadcrumb><h1>{category || title(dept)}</h1><nav className="categories" aria-label={`${title(dept)} categories`}><Link href={`/${dept}`} aria-current={!category ? "page" : undefined}>All {dept}</Link>{categories.map(c => <Link key={c} href={categoryUrl(dept, c)} aria-current={c === category ? "page" : undefined}>{c}</Link>)}</nav><label className="mobile-filter"><select aria-label={`${title(dept)} category`} value={categoryUrl(dept, category)} onChange={e => { router.push(e.target.value, { scroll: false }); }}><option value={`/${dept}`}>All {dept}</option>{categories.map(c => <option key={c} value={categoryUrl(dept, c)}>{c}</option>)}</select></label><div className="products">{items.map(p => card(p, dept))}</div></section>;
+    return <section className="collection">
+      <Breadcrumb>{category ? <><Link href={`/${dept}`}>{title(dept)}</Link><span aria-hidden="true">/</span><span aria-current="page">{category}</span></> : <span aria-current="page">{title(dept)}</span>}</Breadcrumb>
+      <div className="collection-heading"><h1>{category || title(dept)}</h1><p>{items.length} {items.length === 1 ? "style" : "styles"}</p></div>
+      <nav className="categories" aria-label={`${title(dept)} categories`}><Link href={`/${dept}`} aria-current={!category ? "page" : undefined}>All {dept}</Link>{categories.map(c => <Link key={c} href={categoryUrl(dept, c)} aria-current={c === category ? "page" : undefined}>{c}</Link>)}</nav>
+      <label className="mobile-filter"><select aria-label={`${title(dept)} category`} value={categoryUrl(dept, category)} onChange={e => { router.push(e.target.value, { scroll: false }); }}><option value={`/${dept}`}>All {dept}</option>{categories.map(c => <option key={c} value={categoryUrl(dept, c)}>{c}</option>)}</select></label>
+      <div className="products">{items.map(p => card(p, dept))}</div>
+    </section>;
   }
   function ProductPage({ p, dept }: { p: Product; dept: string }) {
     const back = `/${dept}`;
@@ -124,22 +174,34 @@ export default function Storefront({ buyOptions = [] }: { buyOptions?: BuyOption
     const returnTo = productReturnPath(pathname, back);
     const returnLabel = returnTo === "/" ? "Home" : decodeURIComponent(returnTo.split("/").filter(Boolean).map(title).join(" / "));
     const colour = variant(p);
-    const backImage = "backImage" in colour && typeof colour.backImage === "string" ? colour.backImage : undefined;
-    const showingBack = backImage !== undefined && backViewSku === colour.sku;
+    const backSrc = backImage(colour);
+    const showingBack = backSrc !== undefined && backViewSku === colour.sku;
+    const status = photoStatus(colour);
+    const views = backSrc ? [{ label: "Front", src: colour.image, back: false }, { label: "Back", src: backSrc, back: true }] : [];
+    const current = showingBack && backSrc ? backSrc : colour.image;
     return <section className="product-page">
-      <Breadcrumb><Link href={back}>{title(dept)}</Link><span>/</span><Link href={category}>{p.category}</Link></Breadcrumb>
-      <div className="product-layout">
-        <div className="product-title"><Link className="product-back" href={returnTo}>← {returnLabel}</Link><h1>{p.name}</h1></div>
-        <button className={`gallery${enlarged ? " enlarged" : ""}`} onClick={() => setEnlarged(!enlarged)} aria-label={`${enlarged ? "Reduce" : "Enlarge"} ${p.name}`} aria-pressed={enlarged}>
-          <Photo src={showingBack ? backImage : colour.image} alt={`${p.name}, ${colour.name}${backImage ? showingBack ? ", back" : ", front" : ""}`} eager />
-        </button>
+      <Breadcrumb><Link href={back}>{title(dept)}</Link><span aria-hidden="true">/</span><Link href={category}>{p.category}</Link></Breadcrumb>
+      <div className={`product-layout${enlarged ? " is-enlarged" : ""}`}>
+        <div className="product-title">
+          <Link className="product-back" href={returnTo}>← {returnLabel}</Link>
+          <h1>{p.name}</h1>
+          {p.treatment && <p className="product-treatment">{p.treatment.detail}</p>}
+        </div>
+        <div className="gallery-stage">
+          <button className={`gallery${enlarged ? " enlarged" : ""}`} onClick={() => setEnlarged(!enlarged)} aria-label={`${enlarged ? "Reduce" : "Enlarge"} ${p.name}`} aria-pressed={enlarged}>
+            <Photo key={current} src={current} alt={altText(p, colour, views.length ? (showingBack ? "back" : "front") : undefined)} eager />
+            <PhotoFlag variant={colour} />
+          </button>
+          {views.length > 0 && <div className="gallery-thumbs" role="group" aria-label={`${colour.name} views`}>
+            {views.map(view => <button key={view.label} aria-pressed={view.back === showingBack} onClick={() => setBackViewSku(view.back ? colour.sku : null)}>
+              <span className="thumb-frame"><img src={view.src} alt="" decoding="async" /></span><span>{view.label}</span>
+            </button>)}
+          </div>}
+        </div>
         <div className="product-info">
           <p className="detail-price">{formatPrice(p.price)}</p>
-          <p className="chosen">{colour.name}</p>{swatches(p)}
-          {backImage && <div className="product-views" role="group" aria-label="Product views">
-            <button aria-pressed={!showingBack} onClick={() => setBackViewSku(null)}>Front</button>
-            <button aria-pressed={showingBack} onClick={() => setBackViewSku(colour.sku)}>Back</button>
-          </div>}
+          <p className="chosen"><span>Colour</span> {colour.name}</p>{swatches(p)}
+          {status !== "photo" && <p className="photo-note">{status === "preview" ? "Colour preview shown." : "Placeholder image shown."} Product photography for this colour is pending.</p>}
           <PurchaseOptions key={colour.sku} options={buyOptions.filter(o => o.colour.toLowerCase() === colour.name.toLowerCase())} />
           <div className="product-controls"><button onClick={() => setEnlarged(!enlarged)}>{enlarged ? "Reduce image" : "Enlarge image"}</button></div>
           <Link className="category-link" href={category}>All {p.category.toLowerCase()} →</Link>
@@ -162,7 +224,7 @@ export default function Storefront({ buyOptions = [] }: { buyOptions?: BuyOption
         setOpen(null);
         if (page === "home") {
           e.preventDefault();
-          window.scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.classList.contains("reduced") ? "instant" : "smooth" });
+          window.scrollTo({ top: 0, behavior: scrollBehavior() });
         } else {
           e.preventDefault();
           transitionHome(() => router.push("/#top", { scroll: false }));

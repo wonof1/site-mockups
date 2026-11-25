@@ -3,6 +3,10 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import assets from "./assets.json";
+import { easeInOut } from "./motion";
+
+// 2.8s total: the mark holds ~1s, then settles into the header as the film opens up.
+const INTRO_MS = 2800;
 
 
 export default function Arrival() {
@@ -48,17 +52,17 @@ export default function Arrival() {
           animations.push(hero.animate([
             { height: `${window.innerHeight}px` },
             { height: `${restingHeight}px` }
-          ], { duration: 1600, delay: 1800, easing: "cubic-bezier(.65,0,.2,1)", fill: "both" }));
+          ], { duration: 1500, delay: INTRO_MS - 1500, easing: easeInOut, fill: "both" }));
         }
         const motion = logo.animate([
           { opacity: 0, transform: `translate(${dx}px,${dy + 16}px) scale(${scale * .9})`, offset: 0 },
           { opacity: 1, transform: `translate(${dx}px,${dy}px) scale(${scale})`, offset: .24 },
-          { opacity: 1, transform: `translate(${dx}px,${dy}px) scale(${scale})`, offset: .4 },
+          { opacity: 1, transform: `translate(${dx}px,${dy}px) scale(${scale})`, offset: .36 },
           { opacity: 1, transform: "translate(0,0) scale(1)", offset: 1 }
-        ], { duration: 3400, easing: "cubic-bezier(.65,0,.2,1)", fill: "forwards" });
+        ], { duration: INTRO_MS, easing: easeInOut, fill: "forwards" });
         animations.push(motion, backdrop.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 1300, delay: 100, easing: "cubic-bezier(.4,0,.2,1)", fill: "forwards" }));
         void motion.finished.then(finish, () => {});
-        finishTimer = setTimeout(finish, 3800);
+        finishTimer = setTimeout(finish, INTRO_MS + 400);
       });
     });
     document.addEventListener("keydown", keyboard);
@@ -68,7 +72,11 @@ export default function Arrival() {
     document.addEventListener("wo1:skip-arrival", finish);
     preference.addEventListener("change", change);
     return () => {
-      finish(); clearTimeout(waitTimer);
+      // Before playback starts (e.g. StrictMode's mount/unmount/mount), keep the
+      // "waiting" state for the next run; route changes clear it above.
+      if (root.dataset.arrival === "playing") finish();
+      else { cancelled = true; clearTimeout(finishTimer); cancelAnimationFrame(frame); }
+      clearTimeout(waitTimer);
       document.removeEventListener("keydown", keyboard);
       window.removeEventListener("resize", finish);
       document.removeEventListener("wheel", finish);

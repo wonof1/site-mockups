@@ -26,4 +26,6 @@ Run `npm run typecheck` and `npm run build` to check changes. Motion attribution
 
 The storefront displays six curated posts from @wo1_padel, saved on October 1, 2026. Post links and local thumbnail paths live in src/components/storefront/instagram.json; images live in public/storefront/instagram. These are real posts, not a live API feed. Automatic refresh requires an authorized Instagram integration. No access tokens or third-party widget scripts are included.
 
+Photo labels come from `launch-styles.ts`: a colour counts as photographed only when it has a `backImage`, and then gets Front/Back views. Other colours show a "Placeholder image" or "Colour preview" label on cards, story panels and product galleries. The branding notes that tell the WON OF ONE and WO1 styles apart (M02/M03, W03/W04) live in `catalog.ts`.
+
 Product-image transitions run in the browser and respect reduced-motion settings. Modified clicks retain normal link behavior, and scrolling or keyboard input cancels an active transition.

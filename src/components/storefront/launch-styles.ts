@@ -9,13 +9,17 @@ export const launchStyles = [
     "priceMinor": 3800,
     "colours": [
       { name: "Black", hex: "#0a0c0c", sku: "M01-BLACK", shopifyId: "68313349456194",
-        image: "https://cdn.shopify.com/s/files/1/1050/9038/4194/files/m01-black-placeholder.jpg?v=1795466013" },
+        image: "https://cdn.shopify.com/s/files/1/1050/9038/4194/files/m01-black-front.png?v=1795586183",
+        backImage: "https://cdn.shopify.com/s/files/1/1050/9038/4194/files/m01-black-back.png?v=1795586177" },
       { name: "White", hex: "#eff1f1", sku: "M01-WHITE", shopifyId: "68313349488962",
-        image: "https://cdn.shopify.com/s/files/1/1050/9038/4194/files/m01-white-placeholder.jpg?v=1795466014" },
+        image: "https://cdn.shopify.com/s/files/1/1050/9038/4194/files/m01-white-front.png?v=1795586158",
+        backImage: "https://cdn.shopify.com/s/files/1/1050/9038/4194/files/m01-white-back.png?v=1795586152" },
       { name: "Navy Blue", hex: "#274056", sku: "M01-NAVY-BLUE", shopifyId: "68313349521730",
-        image: "https://cdn.shopify.com/s/files/1/1050/9038/4194/files/m01-navy-blue-placeholder.jpg?v=1795466014" },
+        image: "https://cdn.shopify.com/s/files/1/1050/9038/4194/files/m01-navy-blue-front.png?v=1795586170",
+        backImage: "https://cdn.shopify.com/s/files/1/1050/9038/4194/files/m01-navy-blue-back.png?v=1795586164" },
       { name: "Light Gray", hex: "#cfcfcf", sku: "M01-LIGHT-GRAY", shopifyId: "68313349554498",
-        image: "https://cdn.shopify.com/s/files/1/1050/9038/4194/files/m01-light-gray-placeholder.jpg?v=1795466014" }
+        image: "https://cdn.shopify.com/s/files/1/1050/9038/4194/files/m01-light-gray-front.png?v=1795586146",
+        backImage: "https://cdn.shopify.com/s/files/1/1050/9038/4194/files/m01-light-gray-back.png?v=1795586139" }
     ]
   },
   {
@@ -27,11 +31,14 @@ export const launchStyles = [
     "priceMinor": 3900,
     "colours": [
       { name: "Black", hex: "#151515", sku: "M02-BLACK", shopifyId: "68313350177090",
-        image: "https://cdn.shopify.com/s/files/1/1050/9038/4194/files/m02-black-placeholder.jpg?v=1795466023" },
+        image: "https://cdn.shopify.com/s/files/1/1050/9038/4194/files/m02-black-front.png?v=1795586194",
+        backImage: "https://cdn.shopify.com/s/files/1/1050/9038/4194/files/m02-black-back.png?v=1795586188" },
       { name: "Army Green", hex: "#3d3f2f", sku: "M02-ARMY-GREEN", shopifyId: "68313350209858",
-        image: "https://cdn.shopify.com/s/files/1/1050/9038/4194/files/m02-army-green-placeholder.jpg?v=1795466024" },
+        image: "https://cdn.shopify.com/s/files/1/1050/9038/4194/files/m02-army-green-front.png?v=1795586208",
+        backImage: "https://cdn.shopify.com/s/files/1/1050/9038/4194/files/m02-army-green-back.png?v=1795586202" },
       { name: "Khaki", hex: "#a49e84", sku: "M02-KHAKI", shopifyId: "68313350242626",
-        image: "https://cdn.shopify.com/s/files/1/1050/9038/4194/files/m02-khaki-placeholder.jpg?v=1795466023" }
+        image: "https://cdn.shopify.com/s/files/1/1050/9038/4194/files/m02-khaki-front.png?v=1795586219",
+        backImage: "https://cdn.shopify.com/s/files/1/1050/9038/4194/files/m02-khaki-back.png?v=1795586214" }
     ]
   },
   {

@@ -36,6 +36,7 @@ export default function Storefront({ buyOptions = [] }: { buyOptions?: BuyOption
   const [open, setOpen] = useState<Department | "all" | null>(null);
   const closeMenu = useCallback(() => setOpen(null), []);
   const [enlarged, setEnlarged] = useState(false);
+  const [backViewSku, setBackViewSku] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -57,12 +58,14 @@ export default function Storefront({ buyOptions = [] }: { buyOptions?: BuyOption
   const choose = (p: Product, index: number) => {
     if (page === "product") setProductColour({ path: pathname, index });
     else setSelected(s => ({ ...s, [p.id]: index }));
+    setBackViewSku(null);
     setEnlarged(false);
   };
 
   useEffect(() => {
     setOpen(null); setEnlarged(false);
     setProductColour(null);
+    setBackViewSku(null);
     if (previousPath.current !== pathname) main.current?.focus({ preventScroll: true });
     previousPath.current = pathname;
   }, [pathname]);
@@ -121,16 +124,22 @@ export default function Storefront({ buyOptions = [] }: { buyOptions?: BuyOption
     const returnTo = productReturnPath(pathname, back);
     const returnLabel = returnTo === "/" ? "Home" : decodeURIComponent(returnTo.split("/").filter(Boolean).map(title).join(" / "));
     const colour = variant(p);
+    const backImage = "backImage" in colour && typeof colour.backImage === "string" ? colour.backImage : undefined;
+    const showingBack = backImage !== undefined && backViewSku === colour.sku;
     return <section className="product-page">
       <Breadcrumb><Link href={back}>{title(dept)}</Link><span>/</span><Link href={category}>{p.category}</Link></Breadcrumb>
       <div className="product-layout">
         <div className="product-title"><Link className="product-back" href={returnTo}>← {returnLabel}</Link><h1>{p.name}</h1></div>
         <button className={`gallery${enlarged ? " enlarged" : ""}`} onClick={() => setEnlarged(!enlarged)} aria-label={`${enlarged ? "Reduce" : "Enlarge"} ${p.name}`} aria-pressed={enlarged}>
-          <Photo src={colour.image} alt={`${p.name}, ${colour.name}`} eager />
+          <Photo src={showingBack ? backImage : colour.image} alt={`${p.name}, ${colour.name}${backImage ? showingBack ? ", back" : ", front" : ""}`} eager />
         </button>
         <div className="product-info">
           <p className="detail-price">{formatPrice(p.price)}</p>
           <p className="chosen">{colour.name}</p>{swatches(p)}
+          {backImage && <div className="product-views" role="group" aria-label="Product views">
+            <button aria-pressed={!showingBack} onClick={() => setBackViewSku(null)}>Front</button>
+            <button aria-pressed={showingBack} onClick={() => setBackViewSku(colour.sku)}>Back</button>
+          </div>}
           <PurchaseOptions key={colour.sku} options={buyOptions.filter(o => o.colour.toLowerCase() === colour.name.toLowerCase())} />
           <div className="product-controls"><button onClick={() => setEnlarged(!enlarged)}>{enlarged ? "Reduce image" : "Enlarge image"}</button></div>
           <Link className="category-link" href={category}>All {p.category.toLowerCase()} →</Link>
